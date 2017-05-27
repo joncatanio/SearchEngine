@@ -1,0 +1,11 @@
+-- This file must be executed by a user with all privileges including GRANT
+
+-- Create the user that'll be used from Python3 scripts
+source create-user.sql
+
+-- Create and use the database
+source create-db.sql
+use SearchEngineDB
+
+-- Create all the tables
+source create-tables.sql
