@@ -50,7 +50,7 @@ def tf_idf(link, word):
    tf = 0
    if maxWordFreq != 0:
       wordFreq = db.getFreq(link, word)
-      tf = wordFreq / maxWordFreq
+      tf = 0.5 + 0.5 * wordFreq / maxWordFreq
 
    # Calculate IDF
    idf = 0
