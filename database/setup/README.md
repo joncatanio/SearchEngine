@@ -74,5 +74,6 @@ MariaDB [SearchEngineDB] >  SHOW TABLES;
 
 MariaDB [SearchEngineDB] > quit
 Bye
+$ mysql -u root -p < cleanup.mysql
 $ ...
 ```
