@@ -13,7 +13,21 @@ through `db.connection.connection`. This allows all files to maintain a
 connection, avoiding connecting to the database with every API call.
 
 ### query_tables.py
+Endpoints for querying all the database tables.
 
+#### Methods
+`getLinks(words)` - This method returns the list of links that contain any of the given words.
+- `words` - list of strings representing words contained in a search query
+
+`getNumLinks(word = None)` - This method returns the number of links that contain the given word, or the total number of links in the database if no word is given.
+- `word` - string representing the word to search for
+
+`getFreq(word, link)` - This method returns the frequency of a given word for a given link.
+- `word` - string representing the word to search for
+- `link` - string representing the link to search for
+
+`getMaxFreq(link)` - This method returns the maximum frequency achieved by any word for a given link.
+- `link` - string representing the link to search for
 
 ### update_tables.py
 Endpoints for updating all the database tables. The endpoints provided in this file are really for the web crawler and indexer.
