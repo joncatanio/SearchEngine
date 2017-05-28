@@ -5,11 +5,6 @@ import re
 from bs4 import BeautifulSoup
 from datetime import datetime
 
-import sys
-sys.path.insert(0, './algorithms')
-
-import TF_IDF
-
 app = Flask(__name__)
 
 @app.route('/search/<query>/', methods = ['GET'])
