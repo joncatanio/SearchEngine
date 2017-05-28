@@ -1,11 +1,8 @@
+import sys
+sys.path.insert(0, '../database/src')
+import query_tables as db
 import re, math
-# import database as db
-
-# db.getLinks(word)        - The list of all links that contain the given word
-# db.getMaxFreq(link)      - The maximum frequency of any word in the given link
-# db.getFreq(word, link)   - The freqency of a word in a link
-# db.getNumLinks()         - The total number of links
-# db.getNumLinks(word)     - The total number of links that contain the given word
+from nltk.corpus import stopwords
 
 # Strip the words out of a string using regex
 def wordsFromString(string):
@@ -15,7 +12,6 @@ def wordsFromString(string):
 def removeStopWords(words):
    return [w for w in words if w not in stopwords.words('english')]
 
-# from nltk.corpus import stopwords
 # from nltk.stem.porter import *
 # stemmer = PorterStemmer()
 # stopwords = ["a", "about", "an", "are", "as", "at", "be", "by", "for", "from", "how", "in", "is", "of", "on", "or", "that", "the", "these", "this", "to", "was", "what", "when", "where", "who", "will", "with"]
@@ -111,7 +107,7 @@ def findRelevantLinks(query, n):
    # Get the links with the search query terms and sort by cosine similarity
    queryWeights = tf_idf(words)
    linkWeights = [(link, tf_idf(words, link)) for link in linksForQuery(words)]
-   links = sorted(linkWeights, key=lambda (link, linkWeights): cosineSimilarity(queryWeights, linkWeights), reverse=True)
+   links = sorted(linkWeights, key=lambda link, linkWeights: cosineSimilarity(queryWeights, linkWeights), reverse=True)
 
    return links[:n]
 
