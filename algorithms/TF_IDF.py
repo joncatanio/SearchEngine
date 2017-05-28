@@ -32,7 +32,8 @@ def wordsFromQuery(query):
 
 # Find all links that contain at least one of the given words
 def linksForQuery(words):
-   return db.getLinks(words)
+   links = db.getLinks(words)
+   return links if links else []
 
 # Caculate the TF-IDF weight for a given link and given word
 def tf_idf(words, link):
@@ -103,9 +104,11 @@ def findRelevantLinks(query, n):
    words = wordsFromQuery(query.strip().lower())
 
    # Get the links with the search query terms and sort by cosine similarity
-   queryWeights = tf_idf(words)
-   linkWeights = [(link, tf_idf(words, link)) for link in linksForQuery(words)]
-   links = sorted(linkWeights, key=lambda link, linkWeights: cosineSimilarity(queryWeights, linkWeights), reverse=True)
+   links = linksForQuery(words)
+   if links:
+      queryWeights = tf_idf(words)
+      linkWeights = [(link, tf_idf(words, link)) for link in links]
+      links = sorted(linkWeights, key=lambda link, linkWeights: cosineSimilarity(queryWeights, linkWeights), reverse=True)
 
    return links[:n]
 
@@ -114,17 +117,28 @@ def test():
    query1 = "This is a possible search query"
    query2 = "\"What about this query?\""
 
+   # Verify necessary db methods don't crash
+   db.getLinks(["test", "words"])
+   db.getNumLinks("testing")
+   db.getFreq("word", "link.com")
+   db.getMaxFreq("link.com")
+
    print("Query 1: {0}".format(query1))
    words1 = wordsFromQuery(query1)
    print(words1)
-   # query1Weights = tf_idf(words1)
-   # print("Query1 Weights: {0}".format(query1Weights))
+   query1Weights = tf_idf(words1)
+   print("Query1 Weights: {0}".format(query1Weights))
+   links1 = findRelevantLinks(query1, 10)
+   print("Links 1: {0}".format(links1))
 
+   print()
    print("Query 2: {0}".format(query2))
    words2 = wordsFromQuery(query2)
    print(words2)
-   # query2Weights = tf_idf(words2)
-   # print("Query2 Weights: {0}".format(query2Weights))
+   query2Weights = tf_idf(words2)
+   print("Query2 Weights: {0}".format(query2Weights))
+   links2 = findRelevantLinks(query2, 10)
+   print("Links 2: {0}".format(links2))   
 
 if __name__ == "__main__":
    test()
