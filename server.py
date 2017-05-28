@@ -14,20 +14,18 @@ def search(query):
     start = datetime.now()
 
     links = TF_IDF.findRelevantLinks(query, 10)
-    elapsed = datetime.now() - start
 
     results = []
 
-    print(links)
-
     for link in links:
-        page = requests.get(link).text
-        soup = BeautifulSoup(page, 'lxml')
+        page = requests.get(link, verify=False).text
+        soup = BeautifulSoup(page, "html.parser")
         des = soup.find('meta', {'name':'Description'})
+
         if des is None:
             des = soup.find('meta', {'name':'description'})
 
-        if des and len(des) >= 30:
+        if des and len(des['content']) >= 30:
             des = des['content']
         else:
             all_text = soup.find('body').get_text().lower()
@@ -39,6 +37,8 @@ def search(query):
             'link': link,
             'des': des,
         })
+
+    elapsed = datetime.now() - start
 
     content = json.dumps({
         'results': results,

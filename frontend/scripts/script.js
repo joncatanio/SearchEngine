@@ -28,6 +28,7 @@ function make_request(query, _callback) {
 
 function display_results(data, meta) {
 
+    results_section.innerHTML = ""
     results_meta.innerHTML = "About " + meta['num_results'] + " results (" + meta['seconds_elapsed'] + " seconds)";
     results_meta.style.display = 'block';
     data.forEach(function(item, index, array) {

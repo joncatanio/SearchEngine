@@ -111,7 +111,6 @@ def findRelevantLinks(query, n):
       queryWeights = tf_idf_query(words)
       linkWeights = [(link, tf_idf(words, link)) for link in links]
       linkSimilarities = [(link, cosineSimilarity(queryWeights, weights)) for (link, weights) in linkWeights]
-      print(linkSimilarities)
       links = sorted(linkSimilarities, key=lambda entry: entry[1], reverse=True)
 
    return [link[0] for link in links[:n]]
