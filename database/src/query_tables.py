@@ -6,13 +6,14 @@ from pymysql import MySQLError
 def getLinks(words):
    try:
       with db_connection.connection.cursor() as cur:
+         formatTuple = ','.join(['%s'] * len(words))
          sql = '''
             SELECT link FROM Links WHERE id IN 
                (SELECT DISTINCT linkId FROM WordMeta WHERE wordId IN 
-                  (SELECT id FROM Words WHERE word IN %s));
-         '''
-
-         cur.execute(sql, str(tuple(words)))
+                  (SELECT id FROM Words WHERE word IN (%s)));
+         ''' % formatTuple
+         
+         cur.execute(sql, tuple(words))
 
          # Return all the matching links
          return [entry["link"] for entry in cur.fetchall()]
@@ -36,7 +37,7 @@ def getNumLinks(word):
 
          results = cur.fetchall()
          if results and results:
-            return results[0]["COUNT(*)"]
+            return results[0]["COUNT(DISTINCT linkId)"]
          return 0
 
    except MySQLError as err:
@@ -79,7 +80,7 @@ def getMaxFreq(link):
 
          results = cur.fetchall()
          if results and results:
-            return results[0]["COUNT(*)"]
+            return results[0]["FreqCount"]
          return 0
 
    except MySQLError as err:
