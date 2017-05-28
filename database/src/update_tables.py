@@ -1,11 +1,11 @@
 import db_connection
 from pymysql import MySQLError
 
-# Creates a temporary WordMeta table. This is required due to linking words
-# to outdated pages. We simply populate an entirely new table and when
-# `finish_crawl_transaction` is called we truncate WordMeta and populate it
-# with the new information stored in WordMetaTemp. This allows users to query
-# our search engine while we crawl.
+# Creates a temporary WordMeta and Hyperlinks table. This is required due to
+# linking words and links to outdated pages. We simply populate an new tables
+# and when `finish_crawl_transaction` is called we truncate the production
+# tables and add the new information stoed in the temporary tables This allows
+# users to query our search engine while we crawl.
 def start_crawl_transaction():
    try:
       with db_connection.connection.cursor() as cur:
@@ -15,11 +15,14 @@ def start_crawl_transaction():
                linkId   INT UNSIGNED REFERENCES Links(id),
                position INT UNSIGNED NOT NULL
             );
+
+            CREATE TEMPORARY TABLE HyperlinksTemp (
+               baselink  INT UNSIGNED REFERENCES Links(id),
+               hyperlink INT UNSIGNED REFERENCES Links(id)
+            );
          '''
 
          cur.execute(sql)
-
-      db_connection.connection.commit()
    except MySQLError as err:
       print(err)
 
@@ -32,10 +35,15 @@ def finish_crawl_transaction():
             TRUNCATE TABLE WordMeta;
             INSERT INTO WordMeta SELECT * FROM WordMetaTemp;
             DROP TABLE WordMetaTemp;
+
+            TRUNCATE TABLE Hyperlinks;
+            INSERT INTO Hyperlinks SELECT * FROM HyperlinksTemp;
+            DROP TABLE HyperlinksTemp;
          '''
 
          cur.execute(sql)
 
+      # Commit all crawl transactions
       db_connection.connection.commit()
    except MySQLError as err:
       print(err)
@@ -53,8 +61,6 @@ def _addBaseLink(baselink):
          '''
 
          cur.execute(sql, baselink)
-
-      db_connection.connection.commit()
    except MySQLError as err:
       print(err)
 
@@ -77,14 +83,12 @@ def addWords(baselink, words):
          for word in words:
             sql += '(%s),'
 
-         # Remove trailing comma
+         # Remove trailing comma and update duplicates as appropriate
          if words:
             sql = sql[:-1] + ' ON DUPLICATE KEY UPDATE word=VALUES(word)'
 
          word_lst = [word[0] for word in words]
          cur.execute(sql, word_lst)
-
-      db_connection.connection.commit()
 
       # Insert the word information into the WordMetaTemp table
       # This will probably be slow I didn't know how to batch this
@@ -94,18 +98,49 @@ def addWords(baselink, words):
                INSERT INTO WordMetaTemp
                   (wordId, linkId, position)
                SELECT * FROM
-                  (SELECT id from Words where word = %s) AS W
-                  JOIN (SELECT id from Links where link = %s) AS L
+                  (SELECT id FROM Words WHERE word = %s) AS W
+                  JOIN (SELECT id FROM Links WHERE link = %s) AS L
                   JOIN (SELECT %s) AS P
             '''
 
             cur.execute(sql, [word[0], baselink, word[1]])
-
-      db_connection.connection.commit()
    except MySQLError as err:
       print(err)
 
 # Inserts links into the Links table, allows for batching each page. This can
 # be extended to take in a map if necessary for further batching.
-#    baselink - the link of the current page that words are being added from
-#    links    - a list of tuples (link, title_of_page)
+#    baselink - the link of the current page that links are being added from
+#    links    - a list of links linked from baselink
+def addLinks(baselink, links):
+   try:
+      _addBaseLink(baselink)
+
+      with db_connection.connection.cursor() as cur:
+         sql = '''
+            INSERT INTO Links
+               (link)
+            VALUES
+         '''
+
+         for link in links:
+            sql += '(%s),'
+
+         # Remove trailing comma and update duplicates as appropriate
+         if links:
+            sql = sql[:-1] + ' ON DUPLICATE KEY UPDATE link=VALUES(link)'
+
+         cur.execute(sql, links)
+
+      with db_connection.connection.cursor() as cur:
+         for link in links:
+            sql = '''
+               INSERT INTO HyperlinksTemp
+                  (baselink, hyperlink)
+               SELECT * FROM
+                  (SELECT id FROM Links WHERE link = %s) AS B
+                  JOIN (SELECT id FROM Links WHERE link = %s) AS H
+            '''
+
+            cur.execute(sql, [baselink, link])
+   except MySQLError as err:
+      print(err)

@@ -7,3 +7,4 @@ GRANT SELECT, UPDATE, INSERT, CREATE TEMPORARY TABLES
    ON SearchEngineDB.* TO 'searchEngineUser'@'localhost';
 
 GRANT DROP ON SearchEngineDB.WordMeta TO 'searchEngineUser'@'localhost';
+GRANT DROP ON SearchEngineDB.Hyperlinks TO 'searchEngineUser'@'localhost';
