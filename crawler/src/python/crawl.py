@@ -5,6 +5,9 @@ from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 import string
 import PyPDF2
+import sys
+sys.path.insert(0, '../../../')
+import database.src.search_engine_db as db
 
 def check_tag(tag, visited):
 	return (("mailto" not in tag) and (".jpg" not in tag) and (".jpeg" not in tag) and (".png" not in tag) and (".gif" not in tag) and ("csc.calpoly.edu" in tag) and (tag not in visited))
@@ -12,21 +15,19 @@ def check_tag(tag, visited):
 def check_tag_without_visited(tag):
 	return (("mailto" not in tag) and (".jpg" not in tag) and (".jpeg" not in tag) and (".png" not in tag) and (".gif" not in tag) and ("csc.calpoly.edu" in tag))
 
-#input = [word1, word2, ...]
-#output = {word1: [pos1, pos2], word2: [pos2, pos434], ...}
-def index_one_file(term_list):
-	file_index = {}
+# Input = [word1, word2, ...]
+# Updates database returns nothing
+def index_one_file(baselink, term_list):
+   # List of tuples (word, position)
+	word_list = []
 	
 	for index, word in enumerate(term_list):
 		if len(word) == 0:
 			continue
 
-		if word in file_index.keys():
-			file_index[word].append(index)
-		else:
-			file_index[word] = [index]
-	
-	return file_index
+		word_list.append((word, index))
+
+	db.addWords(baselink, word_list)
 
 def read_pdf_file(url):
 	pdf_file_obj = open(url, 'rb')
@@ -50,8 +51,11 @@ def crawl():
 
 	html_text = ""
 
-	while len(urls) > 0:
-		print(urls[0])
+	max_links = 0
+	db.start_crawl_transaction()
+	while len(urls) > 0 and max_links < 300:
+		max_links += 1
+		print("Num Visited:",max_links,"Link:",urls[0])
 
 		if ".pdf" in urls[0]:
 			try:
@@ -70,7 +74,7 @@ def crawl():
 				urls.pop(0)
 				continue
 
-		soup = BeautifulSoup(html_text, "lxml")
+		soup = BeautifulSoup(html_text, "html.parser")
 
 		# kill all script and style elements
 		for script in soup(["script", "style"]):
@@ -91,6 +95,9 @@ def crawl():
 		text = text.replace('\n', ' ').replace('\r', '').replace(u'\xa0', u' ')
 
 		term_list = text.split(' ')
+
+      # Update database
+		index_one_file(urls[0], term_list)
 
 		url_top = urls[0]
 
@@ -114,9 +121,11 @@ def crawl():
 				visited.append(tag['href'])
 
 	print(visited)
+	db.finish_crawl_transaction()
 
 def main():
 	crawl()
 
 if __name__ == "__main__":
+	db.init_db()
 	main()

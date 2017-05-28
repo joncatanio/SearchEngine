@@ -17,6 +17,7 @@ def search(query):
 
     results = []
 
+    print("LINKS:",links)
     for link in links:
         page = requests.get(link, verify=False).text
         soup = BeautifulSoup(page, "html.parser")

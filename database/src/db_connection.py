@@ -6,4 +6,5 @@ def init_connection():
                                 user='searchEngineUser',
                                 password='search_engine_pw',
                                 db='SearchEngineDB',
-                                cursorclass=pymysql.cursors.DictCursor)
+                                cursorclass=pymysql.cursors.DictCursor,
+                                charset='utf8')
