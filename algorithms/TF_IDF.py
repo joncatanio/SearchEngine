@@ -56,7 +56,7 @@ def tf_idf(words, link):
    return weights
 
 # Calculate the TF-IDF for the search query
-def tf_idf(words):
+def tf_idf_query(words):
    maxWordFreq = max([words.count(w) for w in set(words)])
    weights = []
    for word in words:
@@ -88,7 +88,11 @@ def magnitude(list1):
 
 # Determine the similarity between two vectors using the angle between them
 def cosineSimilarity(queryWeights, linkWeights):
-   return dot(queryWeights, linkWeights) / (magnitude(queryWeights) * magnitude(linkWeights))
+   queryMagnitude = magnitude(queryWeights)
+   linkMagnitude = magnitude(linkWeights)
+   if queryMagnitude == 0 or linkMagnitude == 0:
+      return 0
+   return dot(queryWeights, linkWeights) / (queryMagnitude * linkMagnitude)
 
 # Calculate the total weight for a link by combining the TF-IDF weights for each word
 def weightForLink(link, words):
@@ -104,11 +108,13 @@ def findRelevantLinks(query, n):
    # Get the links with the search query terms and sort by cosine similarity
    links = linksForQuery(words)
    if links:
-      queryWeights = tf_idf(words)
+      queryWeights = tf_idf_query(words)
       linkWeights = [(link, tf_idf(words, link)) for link in links]
-      links = sorted(linkWeights, key=lambda link, linkWeights: cosineSimilarity(queryWeights, linkWeights), reverse=True)
+      linkSimilarities = [(link, cosineSimilarity(queryWeights, weights)) for (link, weights) in linkWeights]
+      print(linkSimilarities)
+      links = sorted(linkSimilarities, key=lambda entry: entry[1], reverse=True)
 
-   return links[:n]
+   return [link[0] for link in links[:n]]
 
 def test():
    db.init_db()
@@ -117,6 +123,7 @@ def test():
 
    # Verify necessary db methods don't crash
    db.getLinks(["test", "words"])
+   db.getNumLinks()
    db.getNumLinks("testing")
    db.getFreq("word", "link.com")
    db.getMaxFreq("link.com")
@@ -124,7 +131,7 @@ def test():
    print("Query 1: {0}".format(query1))
    words1 = wordsFromQuery(query1)
    print(words1)
-   query1Weights = tf_idf(words1)
+   query1Weights = tf_idf_query(words1)
    print("Query1 Weights: {0}".format(query1Weights))
    links1 = findRelevantLinks(query1, 10)
    print("Links 1: {0}".format(links1))
@@ -133,7 +140,7 @@ def test():
    print("Query 2: {0}".format(query2))
    words2 = wordsFromQuery(query2)
    print(words2)
-   query2Weights = tf_idf(words2)
+   query2Weights = tf_idf_query(words2)
    print("Query2 Weights: {0}".format(query2Weights))
    links2 = findRelevantLinks(query2, 10)
    print("Links 2: {0}".format(links2))   
