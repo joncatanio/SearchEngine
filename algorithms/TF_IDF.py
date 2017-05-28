@@ -44,23 +44,61 @@ def linksForQuery(words):
    return links
 
 # Caculate the TF-IDF weight for a given link and given word
-def tf_idf(link, word):
-   # Calculate TF
+def tf_idf(words, link):
    maxWordFreq = db.getMaxFreq(link)
-   tf = 0
-   if maxWordFreq != 0:
-      wordFreq = db.getFreq(link, word)
+   weights = []
+   for word in words:
+      # Calculate TF
+      tf = 0
+      if maxWordFreq != 0:
+         wordFreq = db.getFreq(link, word)
+         tf = 0.5 + 0.5 * wordFreq / maxWordFreq
+
+      # Calculate IDF
+      idf = 0
+      numLinksWithWord = db.getNumLinks(word)
+      if numLinksWithWord != 0:
+         numLinks = db.getNumLinks()
+         idf = math.log(numLinks / numLinksWithWord)
+
+      # Return TF-IDF
+      weights.append(tf * idf)
+   return weights
+
+# Calculate the TF-IDF for the search query
+def tf_idf(words):
+   maxWordFreq = max([words.count(w) for w in set(words)])
+   weights = []
+   for word in words:
+      # Calculate TF
+      wordFreq = words.count(word)
       tf = 0.5 + 0.5 * wordFreq / maxWordFreq
 
-   # Calculate IDF
-   idf = 0
-   numLinksWithWord = db.getNumLinks(word)
-   if numLinksWithWord != 0:
-      numLinks = db.getNumLinks()
-      idf = math.log(numLinks / numLinksWithWord)
+      # Calculate IDF
+      idf = 0
+      numLinksWithWord = db.getNumLinks(word)
+      if numLinksWithWord != 0:
+         numLinks = db.getNumLinks()
+         idf = math.log(numLinks / numLinksWithWord)
 
-   # Return TF-IDF
-   return tf * idf
+      # Calculate TF-IDF
+      weights.append(tf * idf)
+   return weights
+
+# Calculate the dot product between two vectors
+def dot(list1, list2):
+   if len(list1) != len(list2):
+      return 0
+   return sum([i*j for (i, j) in zip(list1, list2)])
+
+# Calculate the magnitude of a vector
+def magnitude(list1):
+   squared = sum([x*x for x in list1])
+   return math.sqrt(squared)
+
+# Determine the similarity between two vectors using the angle between them
+def cosineSimilarity(queryWeights, linkWeights):
+   return dot(queryWeights, linkWeights) / (magnitude(queryWeights) * magnitude(linkWeights))
 
 # Calculate the total weight for a link by combining the TF-IDF weights for each word
 def weightForLink(link, words):
@@ -73,8 +111,10 @@ def weightForLink(link, words):
 def findRelevantLinks(query, n):
    words = wordsFromQuery(query.strip().lower())
 
-   # Get the links with the search query terms and sort by relevance
-   links = sorted(linksForQuery(words), key=lambda link: weightForLink(link, words), reverse=True)
+   # Get the links with the search query terms and sort by cosine similarity
+   queryWeights = tf_idf(words)
+   linkWeights = [(link, tf_idf(words, link)) for link in linksForQuery(words)]
+   links = sorted(linkWeights, key=lambda (link, linkWeights): cosineSimilarity(queryWeights, linkWeights), reverse=True)
 
    return links[:n]
 
