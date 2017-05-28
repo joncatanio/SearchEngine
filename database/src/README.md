@@ -33,3 +33,15 @@ Endpoints for updating all the database tables. The endpoints provided in this f
 `addLinks(baselink, links)` - Updates the Links and Hyperlinks tables.
 - `baselink` - string representing the current link of the crawled page
 - `links` - a list of strings representing the links linked from baselink
+
+## Examples
+```python
+import search_engine_db as db
+
+db.init_db()
+db.start_crawl_transaction()
+# Crawler goes to page 'csc.calpoly.edu' and finds the sentence 'computer science'
+db.addWords('csc.calpoly.edu', [('computer', 1), ('science', 2)])
+db.addLinks('csc.calpoly.edu', ['https://www.calpoly.edu', 'https://csc.calpoly.edu/faculty/'])
+db.finish_crawl_transaction()
+```
