@@ -9,11 +9,9 @@ CREATE TABLE Words (
 -- All unique links found by the crawler
 --    id    - primary key
 --    link  - the link itself
---    title - the most likely title of the page linked by `link`
 CREATE TABLE Links (
    id    INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-   link  VARCHAR(255) NOT NULL UNIQUE,
-   title VARCHAR(512) NOT NULL
+   link  VARCHAR(255) NOT NULL UNIQUE
 );
 
 -- Information about each word
