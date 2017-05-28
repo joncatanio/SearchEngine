@@ -4,15 +4,15 @@ This guide assumes that the user has `MySQL 5.7+` installed and has a user
 with `CREATE`, `CREATE_USER`, `CREATE_TEMPORARY_TABLE`, `GRANT_OPTION`, `DROP`, `INDEX`, `SELECT`, and `UPDATE`
 privileges.
 
-To quickly setup the database run the command below:
+**To quickly setup the database run the command below:**
 
 `$ mysql -u <user> -p < setup.mysql`
 
-To cleanup everything done by the setup script run the command below:
+**To cleanup everything done by the setup script run the command below:**
 
 `$ mysql -u <user> -p < cleanup.mysql`
 
-**Note: <user> must have all aforementioned privileges.**
+**Note: `<user>` must have all aforementioned privileges.**
 
 Below is all of the information created by the setup script:
 
@@ -54,3 +54,25 @@ Below is all of the information created by the setup script:
 |baselink|hyperlink|
 |-|-|
 |5|7|
+
+## Examples
+```bash
+$ mysql -u root -p < setup.mysql
+Enter password:
+$ mysql -u searchEngineUser -p SearchEngineDB
+Enter password: search_engine_db
+
+MariaDB [SearchEngineDB] >  SHOW TABLES;
++--------------------------+
+| Tables_in_SearchEngineDB |
++--------------------------+
+| Hyperlinks               |
+| Links                    |
+| WordMeta                 |
+| Words                    |
++--------------------------+
+
+MariaDB [SearchEngineDB] > quit
+Bye
+$ ...
+```
