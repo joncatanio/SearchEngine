@@ -1,6 +1,4 @@
-import sys
-sys.path.insert(0, '../database/src')
-import search_engine_db as db
+from database.src.search_engine_db as db
 import re, math
 from nltk.corpus import stopwords
 
