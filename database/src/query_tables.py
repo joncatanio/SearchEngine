@@ -22,7 +22,7 @@ def getLinks(words):
       print(err)
 
 # Return the total number of links in the database
-def getNumLinks(word):
+def getNumLinks(word = None):
    try:
       with db_connection.connection.cursor() as cur:
          sql = '''SELECT COUNT(*) FROM Links;'''
@@ -37,7 +37,10 @@ def getNumLinks(word):
 
          results = cur.fetchall()
          if results and results:
-            return results[0]["COUNT(DISTINCT linkId)"]
+            if word:
+               return results[0]["COUNT(DISTINCT linkId)"]
+            else:
+               return results[0]["COUNT(*)"]
          return 0
 
    except MySQLError as err:
