@@ -1,4 +1,4 @@
-import db_connection
+import database.src.db_connection as db_connection
 from pymysql import MySQLError
 
 # Creates a temporary WordMeta and Hyperlinks table. This is required due to

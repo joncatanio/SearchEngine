@@ -1,4 +1,4 @@
-import db_connection
+import database.src.db_connection as db_connection
 from pymysql import MySQLError
 
 # Return a list of links that contain at least one word in the given 

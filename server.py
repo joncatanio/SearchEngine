@@ -4,6 +4,8 @@ import requests
 import re
 from bs4 import BeautifulSoup
 from datetime import datetime
+from algorithms import TF_IDF
+import database.src.search_engine_db as db
 
 app = Flask(__name__)
 
@@ -11,43 +13,43 @@ app = Flask(__name__)
 def search(query):
     start = datetime.now()
 
-    try:
-        links = TF_IDF.findRelevantLinks(query, 10)
-        elapsed = datetime.now() - start
+    links = TF_IDF.findRelevantLinks(query, 10)
+    elapsed = datetime.now() - start
 
-        results = []
+    results = []
 
-        for link in links:
-            page = requests.get(link).text
-            soup = BeautifulSoup(page, 'lxml')
-            des = soup.find('meta', {'name':'Description'})
-            if des is None:
-                des = soup.find('meta', {'name':'description'})
+    print(links)
 
-            if des and len(des) >= 30:
-                des = des['content']
-            else:
-                all_text = soup.find('body').get_text().lower()
-                query_index = all_text.find(query.lower())
-                des = " ".join(all_text[query_index - 120: query_index + 120].split(" ")[1:-1])
+    for link in links:
+        page = requests.get(link).text
+        soup = BeautifulSoup(page, 'lxml')
+        des = soup.find('meta', {'name':'Description'})
+        if des is None:
+            des = soup.find('meta', {'name':'description'})
 
-            results.append({ 
-                'title': soup.find('title').text, 
-                'link': link,
-                'des': des,
-            })
+        if des and len(des) >= 30:
+            des = des['content']
+        else:
+            all_text = soup.find('body').get_text().lower()
+            query_index = all_text.find(query.lower())
+            des = " ".join(all_text[query_index - 120: query_index + 120].split(" ")[1:-1])
 
-        content = json.dumps({
-            'results': results,
-            'meta': {
-                'num_results': len(results),
-                'seconds_elapsed': elapsed.total_seconds()
-            }
+        results.append({ 
+            'title': soup.find('title').text, 
+            'link': link,
+            'des': des,
         })
 
-        resp = Response(content, status=200, mimetype='application/json')
-    except:
-        resp = Response("ERROR", status=500, mimetype='application/json')
+    content = json.dumps({
+        'results': results,
+        'meta': {
+            'num_results': len(results),
+            'seconds_elapsed': elapsed.total_seconds()
+        }
+    })
+
+    resp = Response(content, status=200, mimetype='application/json')
+        #resp = Response("ERROR", status=500, mimetype='application/json')
 
     resp.headers['Access-Control-Allow-Origin'] = "*"
     return resp
@@ -55,4 +57,5 @@ def search(query):
 
 if __name__ == '__main__':
     app.debug = True
+    db.init_db()
     app.run()
