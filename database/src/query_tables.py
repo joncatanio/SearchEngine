@@ -80,7 +80,7 @@ def getMaxFreq(link):
 
          results = cur.fetchall()
          if results and results:
-            return results[0]["COUNT(*)"]
+            return results[0]["FreqCount"]
          return 0
 
    except MySQLError as err:
