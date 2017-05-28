@@ -1,6 +1,6 @@
 import sys
 sys.path.insert(0, '../database/src')
-import query_tables as db
+import search_engine_db as db
 import re, math
 from nltk.corpus import stopwords
 
@@ -14,8 +14,6 @@ def removeStopWords(words):
 
 # from nltk.stem.porter import *
 # stemmer = PorterStemmer()
-# stopwords = ["a", "about", "an", "are", "as", "at", "be", "by", "for", "from", "how", "in", "is", "of", "on", "or", "that", "the", "these", "this", "to", "was", "what", "when", "where", "who", "will", "with"]
-# nltk english stopwords = ['i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', 'your', 'yours', 'yourself', 'yourselves', 'he', 'him', 'his', 'himself', 'she', 'her', 'hers', 'herself', 'it', 'its', 'itself', 'they', 'them', 'their', 'theirs', 'themselves', 'what', 'which', 'who', 'whom', 'this', 'that', 'these', 'those', 'am', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'having', 'do', 'does', 'did', 'doing', 'a', 'an', 'the', 'and', 'but', 'if', 'or', 'because', 'as', 'until', 'while', 'of', 'at', 'by', 'for', 'with', 'about', 'against', 'between', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'to', 'from', 'up', 'down', 'in', 'out', 'on', 'off', 'over', 'under', 'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 's', 't', 'can', 'will', 'just', 'don', 'should', 'now', 'd', 'll', 'm', 'o', 're', 've', 'y', 'ain', 'aren', 'couldn', 'didn', 'doesn', 'hadn', 'hasn', 'haven', 'isn', 'ma', 'mightn', 'mustn', 'needn', 'shan', 'shouldn', 'wasn', 'weren', 'won', 'wouldn']
 # def stemWords(words):
 #     stemmed = []
 #     for word in words:
@@ -112,16 +110,21 @@ def findRelevantLinks(query, n):
    return links[:n]
 
 def test():
+   db.init_db()
    query1 = "This is a possible search query"
    query2 = "\"What about this query?\""
 
    print("Query 1: {0}".format(query1))
    words1 = wordsFromQuery(query1)
    print(words1)
+   # query1Weights = tf_idf(words1)
+   # print("Query1 Weights: {0}".format(query1Weights))
 
    print("Query 2: {0}".format(query2))
    words2 = wordsFromQuery(query2)
    print(words2)
+   # query2Weights = tf_idf(words2)
+   # print("Query2 Weights: {0}".format(query2Weights))
 
 if __name__ == "__main__":
    test()
