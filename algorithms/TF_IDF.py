@@ -3,7 +3,7 @@ import re, math
 
 # db.getLinks(word)        - The list of all links that contain the given word
 # db.getMaxFreq(link)      - The maximum frequency of any word in the given link
-# db.getFreq(link, word)   - The freqency of a word in a link
+# db.getFreq(word, link)   - The freqency of a word in a link
 # db.getNumLinks()         - The total number of links
 # db.getNumLinks(word)     - The total number of links that contain the given word
 
@@ -38,10 +38,7 @@ def wordsFromQuery(query):
 
 # Find all links that contain at least one of the given words
 def linksForQuery(words):
-   links = set()
-   for word in words:
-      links = links.union(db.getLinks(word))
-   return links
+   return db.getLinks(words)
 
 # Caculate the TF-IDF weight for a given link and given word
 def tf_idf(words, link):
@@ -51,7 +48,7 @@ def tf_idf(words, link):
       # Calculate TF
       tf = 0
       if maxWordFreq != 0:
-         wordFreq = db.getFreq(link, word)
+         wordFreq = db.getFreq(word, link)
          tf = 0.5 + 0.5 * wordFreq / maxWordFreq
 
       # Calculate IDF
