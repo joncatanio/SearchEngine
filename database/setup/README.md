@@ -1,7 +1,7 @@
 # Quick Setup Guide:
 
-This guide assumes that the user has MySQL 5.7+ installed and has a user
-with CREATE, CREATE_USER, CREATE_TEMPORARY_TABLE, GRANT_OPTION, DROP, INDEX, SELECT, and UPDATE
+This guide assumes that the user has `MySQL 5.7+` installed and has a user
+with `CREATE`, `CREATE_USER`, `CREATE_TEMPORARY_TABLE`, `GRANT_OPTION`, `DROP`, `INDEX`, `SELECT`, and `UPDATE`
 privileges.
 
 To quickly setup the database run the command below:
