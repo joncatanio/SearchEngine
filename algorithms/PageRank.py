@@ -1,8 +1,6 @@
 import numpy
 import math
 
-
-
 class allPages:
    def __init__(self):
       self.inLinks = {}
@@ -15,7 +13,6 @@ class allPages:
 
 def pagerank(pages, dampening = .85, epsilon = .000001):
 
-   links = pages.inLinks.keys()
    n = len(links)
 
    p = numpy.matrix(numpy.ones((n,1)))/n
@@ -51,7 +48,11 @@ def pagerank(pages, dampening = .85, epsilon = .000001):
       converganceChange = numpy.sum(absChange)
       numIterations += 1
 
-   return p
+   rankDict = {}
+   for i, link in enumerate(links):
+      rankDict[link] = p[i]
+
+   return rankDict
 
 
 
