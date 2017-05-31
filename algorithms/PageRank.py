@@ -13,7 +13,6 @@ class allPages:
       self.numberOfOutLinks[pageLink] = numberOfOutLinks;
 
 
-
 def pagerank(pages, dampening = .85, epsilon = .000001):
 
    links = pages.inLinks.keys()
@@ -32,14 +31,14 @@ def pagerank(pages, dampening = .85, epsilon = .000001):
 
       danglingProduct = 0
       for i, link in enumerate(links):
-         if pages.number_out_links[link] == 0:
+         if pages.numberOfOutLinks[link] == 0:
             danglingProduct += p[i]
 
       for i, link in enumerate(links):
 
          linkSum = 0
          for j, inlink in enumerate(pages.inLinks[link]):
-            linkSum += p[j]/g.number_out_links[inLink]
+            linkSum += p[j]/g.numberOfOutLinks[inLink]
 
          sA = dampening * linkSum
          sD = (dampening * danglingProduct) / n
