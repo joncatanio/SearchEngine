@@ -1,4 +1,4 @@
-import database.src.db_connection as db_connection
+import searchengine.database.db_connection as db_connection
 from pymysql import MySQLError
 
 # Return a list of links that contain at least one word in the given 
@@ -12,7 +12,7 @@ def getLinks(words):
                (SELECT DISTINCT linkId FROM WordMeta WHERE wordId IN 
                   (SELECT id FROM Words WHERE word IN (%s)));
          ''' % formatTuple
-         
+
          cur.execute(sql, tuple(words))
 
          # Return all the matching links

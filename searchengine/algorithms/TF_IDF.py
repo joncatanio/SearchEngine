@@ -1,4 +1,4 @@
-import database.src.search_engine_db as db
+import searchengine.database.search_engine_db as db
 import re, math
 from nltk.corpus import stopwords
 

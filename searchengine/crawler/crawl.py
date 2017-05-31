@@ -7,7 +7,7 @@ import string
 import PyPDF2
 import sys
 sys.path.insert(0, '../../../')
-import database.src.search_engine_db as db
+import searchengine.database.search_engine_db as db
 
 def check_tag(tag, visited):
 	return (("mailto" not in tag) and (".jpg" not in tag) and (".jpeg" not in tag) and (".png" not in tag) and (".gif" not in tag) and ("csc.calpoly.edu" in tag) and (tag not in visited))
