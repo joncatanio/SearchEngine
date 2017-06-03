@@ -39,7 +39,7 @@ def getNumLinks(words = None):
                      SELECT id, word
                      FROM Words
                      WHERE
-                        word IN ( ''' + param_string + ''')
+                        word IN (''' + param_string + ''')
                   ) AS W
                   INNER JOIN WordMeta AS WM ON W.id = WM.wordId
                GROUP BY id
@@ -107,51 +107,73 @@ def getMaxFreq(link):
       print(err)
 
 # Returns a list of links that link the parameter `link`
-def getInLinks(link):
+def getInlinks(links):
    try:
+      if not links:
+         return {}
+
       with db_connection.connection.cursor() as cur:
+         param_string = ','.join(['%s'] * len(links))
+
          sql = '''
-            SELECT link
-            FROM Links
-            WHERE id IN (
-               SELECT baselink
-               FROM Hyperlinks
-               WHERE hyperlink = (
-                  SELECT id
-                  FROM Links
-                  WHERE link = %s
-               )
-            )
-         '''
+            SELECT
+               BASE.link AS baselink,
+               INLINK.link AS inlink
+            FROM
+               Hyperlinks AS H
+               INNER JOIN Links AS BASE ON H.hyperlink = BASE.id
+               INNER JOIN Links AS INLINK ON H.baselink = INLINK.id
+            WHERE
+               BASE.link IN (''' + param_string + ''')'''
 
-         cur.execute(sql, [link])
+         cur.execute(sql, links)
          records = cur.fetchall()
-         inLinks = []
-         for record in records:
-            inLinks.append(record['link'])
 
-         return inLinks
+         inlinks = {}
+         for record in records:
+            if record['baselink'] in inlinks:
+               inlinks[record['baselink']].append(record['inlink'])
+            else:
+               inlinks[record['baselink']] = [record['inlink']]
+
+         # Ensure that all links will be in output dictionary
+         [inlinks.update({l:[]}) for l in links if l not in inlinks]
+         return inlinks
 
    except MySQLError as err:
       print(err)
 
 # Returns the number of outlinks linked from `link`
-def getNumOutLinks(link):
+def getNumOutlinks(links):
    try:
+      if not links:
+         return {}
+
       with db_connection.connection.cursor() as cur:
+         param_string = ','.join(['%s'] * len(links))
+
          sql = '''
-            SELECT COUNT(*) AS count
-            FROM Hyperlinks
-            WHERE baselink = (
-               SELECT id
-               FROM Links
-               WHERE link = %s
-            )
+            SELECT
+               link AS baselink,
+               COUNT(*) AS numOutlinks
+            FROM
+               Links AS L
+               INNER JOIN Hyperlinks AS H ON L.id = H.baselink
+            WHERE
+               L.link IN (''' + param_string + ''')
+            GROUP BY
+               L.link
          '''
 
-         cur.execute(sql, [link])
-         record = cur.fetchone()
-         return int(record['count'])
+         cur.execute(sql, links)
+         records = cur.fetchall()
+         numOutlinks = {}
+         for record in records:
+            numOutlinks[record['baselink']] = int(record['numOutlinks'])
+
+         # Ensure that all links will be in output dictionary
+         [numOutlinks.update({l:0}) for l in links if l not in numOutlinks]
+         return numOutlinks
 
    except MySQLError as err:
       print(err)

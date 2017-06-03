@@ -1,7 +1,6 @@
 from flask import Flask, request, Response
 import json
 import requests
-import re
 from bs4 import BeautifulSoup
 from datetime import datetime
 from algorithms import TF_IDF
