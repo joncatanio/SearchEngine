@@ -50,7 +50,7 @@ Endpoints for updating all the database tables. The endpoints provided in this f
 
 ## Examples
 ```python
-import search_engine_db as db
+import searchengine.database.search_engine_db as db
 
 db.init_db()
 db.start_crawl_transaction()
