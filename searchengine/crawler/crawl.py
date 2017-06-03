@@ -10,19 +10,20 @@ sys.path.insert(0, '../../../')
 import searchengine.database.search_engine_db as db
 import searchengine.crawler.stack as stack
 import searchengine.algorithms.PageRank as pr
+import time
 
 # ignore image files and non csc.calpoly.edu urls and
 # the visited links
 def check_tag(tag, visited):
 	return (("mailto" not in tag) and (".jpg" not in tag) and (".jpeg" not in tag) and 
-		(".png" not in tag) and (".gif" not in tag) and ("csc.calpoly.edu" in tag) and 
+		(".png" not in tag) and (".gif" not in tag) and (".exe" not in tag) and ("csc.calpoly.edu" in tag) and 
 		(tag not in visited))
 
 # ignore image files and non csc.calpoly.edu urls but
 # don't worry about visited links
 def check_tag_without_visited(tag):
 	return (("mailto" not in tag) and (".jpg" not in tag) and (".jpeg" not in tag) and 
-		(".png" not in tag) and (".gif" not in tag) and ("csc.calpoly.edu" in tag))
+		(".png" not in tag) and (".gif" not in tag) and (".exe" not in tag) and ("csc.calpoly.edu" in tag))
 
 # Input = [word1, word2, ...]
 # Updates database returns nothing
@@ -66,7 +67,7 @@ def crawl():
 	max_links = 0
 	db.start_crawl_transaction()
 
-	while len(urls) > 0:
+	while len(urls) > 0:	
 		max_links += 1
 		print("Num Visited:",max_links,"Link:",urls[0])
 
