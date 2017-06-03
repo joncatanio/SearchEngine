@@ -7,11 +7,13 @@ CREATE TABLE Words (
 );
 
 -- All unique links found by the crawler
---    id    - primary key
---    link  - the link itself
+--    id       - primary key
+--    link     - the link itself
+--    pageRank - the PageRank computed after crawling, 30 is max decimal support
 CREATE TABLE Links (
-   id    INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-   link  VARCHAR(255) NOT NULL UNIQUE
+   id       INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+   link     VARCHAR(255) NOT NULL UNIQUE,
+   pageRank DECIMAL(31, 30) NOT NULL DEFAULT '0.00'
 );
 
 -- Information about each word
