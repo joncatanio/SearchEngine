@@ -8,6 +8,7 @@ import PyPDF2
 import sys
 sys.path.insert(0, '../../../')
 import searchengine.database.search_engine_db as db
+import searchengine.crawler.stack as stack
 
 # ignore image files and non csc.calpoly.edu urls and
 # the visited links
@@ -50,10 +51,12 @@ def read_pdf_file(url):
 	return total_text
 
 def crawl():
-	url = "https://csc.calpoly.edu/"
+	urls = [url.split("\n")[0] for url in stack.get_stack()] # stack of urls to scrape
 
-	urls = [url] # stack of urls to scrape
-	visited = [url] # historic record of urls
+	# The first url we're crawling needs to be marked as already visited. 
+	# Otherwise if the page contained a link to itself, we'd crawl it twice.
+	visited = ["https://csc.calpoly.edu/"]
+
 	exclude = set(string.punctuation)
 	url_map = {}
 
@@ -119,7 +122,7 @@ def crawl():
 		print("num urls:", len(urls))
 
 		for tag in soup.findAll('a', href=True):
-			tag['href'] = urljoin(url, tag['href'])
+			tag['href'] = urljoin("https://csc.calpoly.edu/", tag['href'])
 
 			# check if the url is valid not worrying about visited, 
 			# this is to get the mapping from a link to get
@@ -127,14 +130,13 @@ def crawl():
 				url_map[url_top].append(tag['href'])
 
 		for tag in soup.findAll('a', href=True):
-			tag['href'] = urljoin(url, tag['href'])
+			tag['href'] = urljoin("https://csc.calpoly.edu/", tag['href'])
 			
 			# check if the url is valid and has not been visited 
 			if check_tag(tag['href'], visited):
 				urls.append(tag['href'])
 				visited.append(tag['href'])
 
-	print(visited)
 	db.finish_crawl_transaction()
 
 def main():
