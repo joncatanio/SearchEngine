@@ -8,7 +8,7 @@ def getLinks(words):
       with db_connection.connection.cursor() as cur:
          formatTuple = ','.join(['%s'] * len(words))
          sql = '''
-            SELECT link FROM Links WHERE id IN
+            SELECT link, pageRank FROM Links WHERE id IN
                (SELECT DISTINCT linkId FROM WordMeta WHERE wordId IN
                   (SELECT id FROM Words WHERE word IN (%s)));
          ''' % formatTuple
@@ -16,7 +16,7 @@ def getLinks(words):
          cur.execute(sql, tuple(words))
 
          # Return all the matching links
-         return [entry["link"] for entry in cur.fetchall()]
+         return [(entry["link"], entry["pageRank"]) for entry in cur.fetchall()]
 
    except MySQLError as err:
       print(err)
@@ -43,8 +43,8 @@ def getNumLinks(words = None):
                GROUP BY id, word
             '''
 
-         cur.execute(sql, words)
          if words:
+            cur.execute(sql, tuple(words))
             results = cur.fetchall()
 
             numLinks = {}
@@ -54,6 +54,7 @@ def getNumLinks(words = None):
             # Ensure that all words will be in output dictionary
             [numLinks.update({w:0}) for w in words if w not in numLinks]
          else:
+            cur.execute(sql)
             result = cur.fetchone()
             numLinks = int(result['numLinks']) if result else 0
 
