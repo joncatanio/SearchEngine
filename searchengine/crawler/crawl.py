@@ -9,6 +9,7 @@ import sys
 sys.path.insert(0, '../../../')
 import searchengine.database.search_engine_db as db
 import searchengine.crawler.stack as stack
+import searchengine.algorithms.PageRank as pr
 
 # ignore image files and non csc.calpoly.edu urls and
 # the visited links
@@ -139,8 +140,21 @@ def crawl():
 
 	db.finish_crawl_transaction()
 
+	return visited
+
 def main():
-	crawl()
+	visited = crawl()
+
+	# page rank
+	in_links = db.getInlinks(visited)
+	out_links = db.getOutLinks(visited)
+
+	pr.AllPages(in_link, out_links)
+
+	link_page_ranks = pr.pagerank(allPages)
+
+	# insert page rank data into DB
+	db.updatePageRank(link_page_ranks)
 
 if __name__ == "__main__":
 	db.init_db()
