@@ -149,9 +149,9 @@ def main():
 	in_links = db.getInlinks(visited)
 	out_links = db.getOutLinks(visited)
 
-	pr.AllPages(in_link, out_links)
+	all_pages = pr.AllPages(in_link, out_links)
 
-	link_page_ranks = pr.pagerank(allPages)
+	link_page_ranks = pr.pagerank(all_pages)
 
 	# insert page rank data into DB
 	db.updatePageRank(link_page_ranks)
