@@ -5,7 +5,7 @@ import re
 from bs4 import BeautifulSoup
 from datetime import datetime
 from algorithms import TF_IDF
-import database.src.search_engine_db as db
+import database.search_engine_db as db
 
 app = Flask(__name__)
 
@@ -17,7 +17,6 @@ def search(query):
 
     results = []
 
-    print("LINKS:",links)
     for link in links:
         page = requests.get(link, verify=False).text
         soup = BeautifulSoup(page, "html.parser")
@@ -26,17 +25,21 @@ def search(query):
         if des is None:
             des = soup.find('meta', {'name':'description'})
 
-        if des and len(des['content']) >= 30:
+        if des and des['content'] and len(des['content']) >= 30:
             des = des['content']
         else:
-            all_text = soup.find('body').get_text().lower()
-            query_index = all_text.find(query.lower())
-            des = " ".join(all_text[query_index - 120: query_index + 120].split(" ")[1:-1])
+            body = soup.find('body')
+            if body is not None:
+                all_text = body.get_text().lower()
+                query_index = all_text.find(query.lower())
+                des = " ".join(all_text[query_index - 120: query_index + 120].split(" ")[1:-1])
+
+        title = soup.find('title')
 
         results.append({ 
-            'title': soup.find('title').text, 
+            'title': title.text if title is not None else link, 
             'link': link,
-            'des': des,
+            'des': des if des is not None else '- - -',
         })
 
     elapsed = datetime.now() - start
