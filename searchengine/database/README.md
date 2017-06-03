@@ -29,6 +29,12 @@ Endpoints for querying all the database tables.
 `getMaxFreq(link)` - This method returns the maximum frequency achieved by any word for a given link.
 - `link` - string representing the link to search for
 
+`getInLinks(link)` - This method returns a list of links that themselves link the given link.
+- `link` - string representing a link
+
+`getNumOutLinks(link)` - This method returns an integer representing the number of outlinks from the given link.
+- `link` - string representing the link to analyze
+
 ### update_tables.py
 Endpoints for updating all the database tables. The endpoints provided in this file are really for the web crawler and indexer.
 
