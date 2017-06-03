@@ -54,6 +54,9 @@ Endpoints for updating all the database tables. The endpoints provided in this f
 - `baselink` - string representing the current link of the crawled page
 - `links` - a list of strings representing the links linked from baselink
 
+`updatePageRank(links)` - Updates the Links tables with new PageRank values.
+- `links` - a dictionary `{link: pageRank, ...}` of links to update
+
 ## Examples
 ```python
 import searchengine.database.search_engine_db as db

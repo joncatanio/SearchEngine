@@ -144,3 +144,21 @@ def addLinks(baselink, links):
             cur.execute(sql, [baselink, link])
    except MySQLError as err:
       print(err)
+
+# Inserts the PageRank values into the Links table
+#    links - dictionary of {link: pageRank} to update the Links table with
+def updatePageRank(links):
+   try:
+      with db_connection.connection.cursor() as cur:
+         sql = '''
+            UPDATE Links
+            SET pageRank = %s
+            WHERE link = %s
+         '''
+
+         # Create a list of lists for executemany() [[link, num], ...]
+         lst = [[t[1], t[0]] for t in links.items()]
+         cur.executemany(sql, lst)
+
+   except MySQLError as err:
+      print(err)

@@ -35,14 +35,12 @@ def getNumLinks(words = None):
                   id,
                   word,
                   COUNT(DISTINCT linkId) AS numLinks
-               FROM (
-                     SELECT id, word
-                     FROM Words
-                     WHERE
-                        word IN (''' + param_string + ''')
-                  ) AS W
+               FROM
+                  Words AS W
                   INNER JOIN WordMeta AS WM ON W.id = WM.wordId
-               GROUP BY id
+               WHERE
+                  word IN (''' + param_string + ''')
+               GROUP BY id, word
             '''
 
          cur.execute(sql, words)
