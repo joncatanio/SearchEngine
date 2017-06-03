@@ -134,7 +134,7 @@ def getNumOutLinks(link):
 
          cur.execute(sql, [link])
          record = cur.fetchone()
-         return record['count']
+         return int(record['count'])
 
    except MySQLError as err:
       print(err)
