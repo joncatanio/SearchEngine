@@ -64,7 +64,6 @@ def crawl():
 	html_text = ""
 
 	max_links = 0
-	db.start_crawl_transaction()
 
 	while len(urls) > 0:
 		max_links += 1
@@ -138,8 +137,6 @@ def crawl():
 				urls.append(tag['href'])
 				visited.append(tag['href'])
 
-	db.finish_crawl_transaction()
-
 	return visited
 
 def main():
@@ -147,9 +144,9 @@ def main():
 
 	# page rank
 	in_links = db.getInlinks(visited)
-	out_links = db.getOutLinks(visited)
+	out_links = db.getNumOutlinks(visited)
 
-	all_pages = pr.AllPages(in_link, out_links)
+	all_pages = pr.AllPages(in_links, out_links)
 
 	link_page_ranks = pr.pagerank(all_pages)
 
@@ -158,4 +155,6 @@ def main():
 
 if __name__ == "__main__":
 	db.init_db()
+	db.start_crawl_transaction()
 	main()
+	db.finish_crawl_transaction()

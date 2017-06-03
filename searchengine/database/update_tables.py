@@ -157,7 +157,7 @@ def updatePageRank(links):
          '''
 
          # Create a list of lists for executemany() [[link, num], ...]
-         lst = [[t[1], t[0]] for t in links.items()]
+         lst = [[float(t[1]), t[0]] for t in links.items()]
          cur.executemany(sql, lst)
 
    except MySQLError as err:

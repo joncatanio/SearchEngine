@@ -51,7 +51,7 @@ def tf_idf(words, link, pageRankWeight, numDBLinks, numLinksPerWord):
 
       # Return TF-IDF
       tfidf = tf * idf
-      weight = tfidf * pageRankWeight
+      weight = tfidf * float(pageRankWeight)
       weights.append(tf * idf)
    return weights
 
