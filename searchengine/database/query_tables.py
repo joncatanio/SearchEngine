@@ -21,28 +21,45 @@ def getLinks(words):
    except MySQLError as err:
       print(err)
 
-# Return the total number of links in the database
-def getNumLinks(word = None):
+# Return the total number of links in the database or the number of links
+# which contain the given words
+def getNumLinks(words = None):
    try:
       with db_connection.connection.cursor() as cur:
-         sql = '''SELECT COUNT(*) FROM Links;'''
-         if word:
+         sql = '''SELECT COUNT(*) AS numLinks FROM Links;'''
+         if words:
+            param_string = ','.join(['%s'] * len(words))
+
             sql = '''
-               SELECT COUNT(DISTINCT linkId) FROM WordMeta
-               WHERE
-                  wordId=(SELECT id FROM Words WHERE word=%s);
+               SELECT
+                  id,
+                  word,
+                  COUNT(DISTINCT linkId) AS numLinks
+               FROM (
+                     SELECT id, word
+                     FROM Words
+                     WHERE
+                        word IN ( ''' + param_string + ''')
+                  ) AS W
+                  INNER JOIN WordMeta AS WM ON W.id = WM.wordId
+               GROUP BY id
             '''
 
-         cur.execute(sql, word)
+         cur.execute(sql, words)
+         if words:
+            results = cur.fetchall()
 
-         results = cur.fetchall()
-         if results and results:
-            if word:
-               return results[0]["COUNT(DISTINCT linkId)"]
-            else:
-               return results[0]["COUNT(*)"]
-         return 0
+            numLinks = {}
+            for result in results:
+               numLinks[result['word']] = result['numLinks']
 
+            # Ensure that all words will be in output dictionary
+            [numLinks.update({w:0}) for w in words if w not in numLinks]
+         else:
+            result = cur.fetchone()
+            numLinks = int(result['numLinks']) if result else 0
+
+         return numLinks
    except MySQLError as err:
       print(err)
 
