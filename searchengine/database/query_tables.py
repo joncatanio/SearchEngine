@@ -33,7 +33,7 @@ def getNumLinks(word = None):
                   wordId=(SELECT id FROM Words WHERE word=%s);
             '''
 
-         cur.execute(sql, [word])
+         cur.execute(sql, word)
 
          results = cur.fetchall()
          if results and results:

@@ -5,7 +5,7 @@ import re
 from bs4 import BeautifulSoup
 from datetime import datetime
 from algorithms import TF_IDF
-import searchengine.database.src.search_engine_db as db
+import searchengine.database.search_engine_db as db
 
 app = Flask(__name__)
 
