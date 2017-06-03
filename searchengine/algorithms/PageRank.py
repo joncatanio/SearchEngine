@@ -2,27 +2,27 @@ import numpy
 import math
 
 class AllPages:
-   def __init__(self):
-      self.inLinks = {}
-      self.numberOfOutLinks = {}
-
-   def addPage(self, pageLink, inLinks, numberOfOutLinks):
-      self.inLinks[pageLink] = inLinks
-      self.numberOfOutLinks[pageLink] = numberOfOutLinks;
+   def __init__(self, inLinks, numberOfOutLinks):
+      self.inLinks = inLinks
+      self.numberOfOutLinks = numberOfOutLinks
 
 
 def pagerank(pages, dampening = .85, epsilon = .000001):
 
+   links = pages.inLinks.keys()
    n = len(links)
+   linkIndex = {}
+
+   for i, link in enumerate(links):
+      linkIndex[link] = i
 
    p = numpy.matrix(numpy.ones((n,1)))/n
 
-   links = pages.inLinks.keys()
-
-   converganceChange = 0
+   converganceChange = epsilon
    numIterations = 0
 
-   while converganceChange > e:
+
+   while converganceChange >= epsilon:
 
       m = numpy.matrix(numpy.zeros((n,1)))
 
@@ -34,8 +34,9 @@ def pagerank(pages, dampening = .85, epsilon = .000001):
       for i, link in enumerate(links):
 
          linkSum = 0
-         for j, inlink in enumerate(pages.inLinks[link]):
-            linkSum += p[j]/g.numberOfOutLinks[inLink]
+         for inLink in pages.inLinks[link]:
+            if (pages.numberOfOutLinks[inLink] != 0):
+               linkSum += p[linkIndex[inLink]]/pages.numberOfOutLinks[inLink]
 
          sA = dampening * linkSum
          sD = (dampening * danglingProduct) / n
@@ -47,10 +48,13 @@ def pagerank(pages, dampening = .85, epsilon = .000001):
       absChange = numpy.abs(oldP-p)
       converganceChange = numpy.sum(absChange)
       numIterations += 1
+      print (converganceChange)
+      print (numIterations)
 
+   print (p)
    rankDict = {}
    for i, link in enumerate(links):
-      rankDict[link] = p[i]
+      rankDict[link] = p[i][0,0]
 
    return rankDict
 
@@ -68,13 +72,14 @@ def main():
 
    outLinksCount = {}
 
-   for link in inLinks:
-      outLinksCount[link] = 2
+   for i, link in enumerate(inLinks):
+      outLinksCount[link] = i
 
    allPages = AllPages()
 
    for link in inLinks:
       allPages.addPage(link, inLinks[link], outLinksCount[link])
+
 
    pagerank(allPages)
 
