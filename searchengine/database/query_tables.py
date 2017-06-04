@@ -63,22 +63,42 @@ def getNumLinks(words = None):
       print(err)
 
 # Return the frequency of a given word for a given link
-def getFreq(word, link):
+# {link: {word: frequency}}
+def getFreq(words, links):
    try:
       with db_connection.connection.cursor() as cur:
+         link_params = ','.join(['%s'] * len(links))
+         word_params = ','.join(['%s'] * len(words))
+
          sql = '''
-            SELECT COUNT(*) FROM WordMeta WHERE
-               wordId=(SELECT id FROM Words WHERE word=%s) AND
-               linkId=(SELECT id FROM Links WHERE link=%s);
+            SELECT
+               link,
+               word,
+               COUNT(*) AS freq
+            FROM
+               WordMeta AS WM
+               INNER JOIN Words AS W ON WM.wordId = W.id
+               INNER JOIN Links AS L ON WM.linkId = L.id
+            WHERE
+               link IN (''' + link_params + ''')
+               AND word IN (''' + word_params + ''')
+            GROUP BY
+               link,
+               word
          '''
 
-         cur.execute(sql, (word, link))
+         cur.execute(sql, links + words)
 
-         results = cur.fetchall()
-         if results and results:
-            return results[0]["COUNT(*)"]
-         return 0
+         records = cur.fetchall()
+         freq_dict = {}
+         for record in records:
+            # record = {'link': str, 'word': str, 'frequency': num}
+            if record['link'] in freq_dict:
+               freq_dict[record['link']].update({record['word']:record['freq']})
+            else:
+               freq_dict[record['link']] = {record['word']:record['freq']}
 
+         return freq_dict
    except MySQLError as err:
       print(err)
 

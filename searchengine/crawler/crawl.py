@@ -78,7 +78,7 @@ def crawl():
 
 	max_links = 0
 
-	while len(urls) > 0:	
+	while len(urls) > 0 and max_links < 2000:	
 		max_links += 1
 		print("Num Visited:",max_links,"Link:",urls[0])
 
