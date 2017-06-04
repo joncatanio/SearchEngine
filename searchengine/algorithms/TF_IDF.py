@@ -34,13 +34,13 @@ def linksForQuery(words):
    return links if links else []
 
 # Caculate the TF-IDF weight for a given link and given word
-def tf_idf(words, link, pageRankWeight, numDBLinks, numLinksPerWord, maxWordFreq):
+def tf_idf(words, link, pageRankWeight, numDBLinks, numLinksPerWord, maxWordFreq, wordFreqs):
    weights = []
    for word in words:
       # Calculate TF
       tf = 0
       if maxWordFreq != 0:
-         wordFreq = db.getFreq(word, link)
+         wordFreq = wordFreqs[word] if word in wordFreqs else 0
          tf = 0.5 + 0.5 * wordFreq / maxWordFreq
 
       # Calculate IDF
@@ -105,10 +105,10 @@ def findRelevantLinks(query, n):
       numDBLinks = db.getNumLinks()
       numLinksPerWord = db.getNumLinks(words)
       maxFreqPerLink = db.getMaxFreq(links)
-      print("Max Freq:", maxFreqPerLink)
+      wordFreqPerLink = db.getFreq(words, links)
 
       queryWeights = tf_idf_query(words, numDBLinks, numLinksPerWord)      
-      linkWeights = [(link, tf_idf(words, link, PRWeight, numDBLinks, numLinksPerWord, maxFreqPerLink[link]), PRWeight) for (link, PRWeight) in linksAndPRWeights]
+      linkWeights = [(link, tf_idf(words, link, PRWeight, numDBLinks, numLinksPerWord, maxFreqPerLink[link], wordFreqPerLink[link]), PRWeight) for (link, PRWeight) in linksAndPRWeights]
       linkSimilarities = [(link, harmonicMean(cosineSimilarity(queryWeights, weights), float(PRWeight))) for (link, weights, PRWeight) in linkWeights]
       links = sorted(linkSimilarities, key=lambda entry: entry[1], reverse=True)
 
