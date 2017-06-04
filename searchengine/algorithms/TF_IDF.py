@@ -92,6 +92,9 @@ def cosineSimilarity(queryWeights, linkWeights):
       return 0
    return dot(queryWeights, linkWeights) / (queryMagnitude * linkMagnitude)
 
+def harmonicMean(cosSim, pageRank):
+   return 2 * (cosSim * pageRank) / (cosSim + pageRank)
+
 # Find the top n relevant links for a given search query
 def findRelevantLinks(query, n):
    words = wordsFromQuery(query.strip().lower())
@@ -104,8 +107,8 @@ def findRelevantLinks(query, n):
       numLinksPerWord = db.getNumLinks(words)
 
       queryWeights = tf_idf_query(words, numDBLinks, numLinksPerWord)      
-      linkWeights = [(link, tf_idf(words, link, PRWeight, numDBLinks, numLinksPerWord)) for (link, PRWeight) in linksAndPRWeights]
-      linkSimilarities = [(link, cosineSimilarity(queryWeights, weights)) for (link, weights) in linkWeights]
+      linkWeights = [(link, tf_idf(words, link, PRWeight, numDBLinks, numLinksPerWord), PRWeight) for (link, PRWeight) in linksAndPRWeights]
+      linkSimilarities = [(link, harmonicMean(cosineSimilarity(queryWeights, weights), float(PRWeight))) for (link, weights, PRWeight) in linkWeights]
       links = sorted(linkSimilarities, key=lambda entry: entry[1], reverse=True)
 
    return [link[0] for link in links[:n]]
