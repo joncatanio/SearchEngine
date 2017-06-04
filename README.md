@@ -21,6 +21,8 @@ Our crawler starts out with a url stack to increase the chances of reaching as m
 #### Setup
 `stack.py` uses a custom Google search engine in order to retrieve search results. In order to communicate with Google's API, an API key and a search engine id are required.
 
+Run `pip install google-api-python-client`
+
 Create a file called `config.py` within the `crawler ` directory. Inside, paste:
 ```
 key = '<api key goes here>'
