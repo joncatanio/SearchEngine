@@ -8,6 +8,7 @@ import PyPDF2
 import sys
 sys.path.insert(0, '../../../')
 import searchengine.database.search_engine_db as db
+import searchengine.database.update_tables as update_db
 import searchengine.crawler.stack as stack
 import searchengine.algorithms.PageRank as pr
 import signal
@@ -72,7 +73,6 @@ def crawl():
 	visited = ["https://csc.calpoly.edu/"]
 
 	exclude = set(string.punctuation)
-	url_map = {}
 
 	html_text = ""
 
@@ -132,7 +132,7 @@ def crawl():
 
 				url_top = urls[0]
 
-				url_map[url_top] = []
+				links_to_add = []
 
 				urls.pop(0)
 
@@ -144,7 +144,9 @@ def crawl():
 					# check if the url is valid not worrying about visited, 
 					# this is to get the mapping from a link to get
 					if check_tag_without_visited(tag['href']):
-						url_map[url_top].append(tag['href'])
+						links_to_add.append(tag['href'])
+					
+				update_db.addLink(url_top, tag['href'])
 
 				for tag in soup.findAll('a', href=True):
 					tag['href'] = urljoin("https://csc.calpoly.edu/", tag['href'])
@@ -153,6 +155,7 @@ def crawl():
 					if check_tag(tag['href'], visited):
 						urls.append(tag['href'])
 						visited.append(tag['href'])
+						
 		except Exception as e:
 			print(str(e))
 			urls.pop(0)
