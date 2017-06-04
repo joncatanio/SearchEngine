@@ -104,23 +104,26 @@ def getFreq(words, links):
 
 # Return the maximum frequency achieved by any word associated with
 # a given link
-def getMaxFreq(link):
+def getMaxFreq(links):
    try:
       with db_connection.connection.cursor() as cur:
+         formatTuple = ','.join(['%s'] * len(links))
          sql = '''
-            SELECT wordId, COUNT(*) AS FreqCount FROM WordMeta
-            WHERE
-               linkId=(SELECT id FROM Links WHERE link=%s)
-            GROUP BY wordId
-            ORDER BY FreqCount DESC;
-         '''
+            SELECT link, linkId, MAX(FreqCount) as Freq FROM
+               (SELECT wordId, linkId, COUNT(*) as FreqCount FROM WordMeta
+               WHERE
+                  linkId IN (SELECT id FROM Links WHERE link IN (%s))
+               GROUP BY wordId, linkId) as newTable
+               INNER JOIN Links as L ON L.id = newTable.linkId
+            GROUP BY linkId;
+         ''' % formatTuple
 
-         cur.execute(sql, [link])
+         cur.execute(sql, links)
 
          results = cur.fetchall()
-         if results and results:
-            return results[0]["FreqCount"]
-         return 0
+         if results:
+            return {result["link"]:result["Freq"] for result in results}
+         return None#{link:0 for link in links}
 
    except MySQLError as err:
       print(err)

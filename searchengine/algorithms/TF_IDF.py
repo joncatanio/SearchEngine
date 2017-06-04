@@ -1,5 +1,5 @@
 import searchengine.database.search_engine_db as db
-import re, math
+import re, math, cProfile
 from nltk.corpus import stopwords
 
 # Strip the words out of a string using regex
@@ -34,8 +34,7 @@ def linksForQuery(words):
    return links if links else []
 
 # Caculate the TF-IDF weight for a given link and given word
-def tf_idf(words, link, pageRankWeight, numDBLinks, numLinksPerWord):
-   maxWordFreq = db.getMaxFreq(link)
+def tf_idf(words, link, pageRankWeight, numDBLinks, numLinksPerWord, maxWordFreq):
    weights = []
    for word in words:
       # Calculate TF
@@ -105,9 +104,11 @@ def findRelevantLinks(query, n):
    if links:
       numDBLinks = db.getNumLinks()
       numLinksPerWord = db.getNumLinks(words)
+      maxFreqPerLink = db.getMaxFreq(links)
+      print("Max Freq:", maxFreqPerLink)
 
       queryWeights = tf_idf_query(words, numDBLinks, numLinksPerWord)      
-      linkWeights = [(link, tf_idf(words, link, PRWeight, numDBLinks, numLinksPerWord), PRWeight) for (link, PRWeight) in linksAndPRWeights]
+      linkWeights = [(link, tf_idf(words, link, PRWeight, numDBLinks, numLinksPerWord, maxFreqPerLink[link]), PRWeight) for (link, PRWeight) in linksAndPRWeights]
       linkSimilarities = [(link, harmonicMean(cosineSimilarity(queryWeights, weights), float(PRWeight))) for (link, weights, PRWeight) in linkWeights]
       links = sorted(linkSimilarities, key=lambda entry: entry[1], reverse=True)
 
@@ -115,34 +116,37 @@ def findRelevantLinks(query, n):
 
 def test():
    db.init_db()
-   query1 = "This is a possible search query"
-   query2 = "\"What about this query?\""
+   cProfile.run('findRelevantLinks("computer", 10)')
 
-   # Verify necessary db methods don't crash
-   db.getLinks(["test", "words"])
-   numDBLinks = db.getNumLinks()
-   db.getNumLinks("testing")
-   db.getFreq("word", "link.com")
-   db.getMaxFreq("link.com")
+   # db.init_db()
+   # query1 = "This is a possible search query"
+   # query2 = "\"What about this query?\""
 
-   print("Query 1: {0}".format(query1))
-   words1 = wordsFromQuery(query1)
-   print(words1)
-   numLinksPerWord1 = db.getNumLinks(words1)
-   query1Weights = tf_idf_query(words1, numDBLinks, numLinksPerWord1)
-   print("Query1 Weights: {0}".format(query1Weights))
-   links1 = findRelevantLinks(query1, 10)
-   print("Links 1: {0}".format(links1))
+   # # Verify necessary db methods don't crash
+   # db.getLinks(["test", "words"])
+   # numDBLinks = db.getNumLinks()
+   # db.getNumLinks("testing")
+   # db.getFreq("word", "link.com")
+   # db.getMaxFreq("link.com")
 
-   print()
-   print("Query 2: {0}".format(query2))
-   words2 = wordsFromQuery(query2)
-   print(words2)
-   numLinksPerWord2 = db.getNumLinks(words2)
-   query2Weights = tf_idf_query(words2, numDBLinks, numLinksPerWord1)
-   print("Query2 Weights: {0}".format(query2Weights))
-   links2 = findRelevantLinks(query2, 10)
-   print("Links 2: {0}".format(links2))   
+   # print("Query 1: {0}".format(query1))
+   # words1 = wordsFromQuery(query1)
+   # print(words1)
+   # numLinksPerWord1 = db.getNumLinks(words1)
+   # query1Weights = tf_idf_query(words1, numDBLinks, numLinksPerWord1)
+   # print("Query1 Weights: {0}".format(query1Weights))
+   # links1 = findRelevantLinks(query1, 10)
+   # print("Links 1: {0}".format(links1))
+
+   # print()
+   # print("Query 2: {0}".format(query2))
+   # words2 = wordsFromQuery(query2)
+   # print(words2)
+   # numLinksPerWord2 = db.getNumLinks(words2)
+   # query2Weights = tf_idf_query(words2, numDBLinks, numLinksPerWord1)
+   # print("Query2 Weights: {0}".format(query2Weights))
+   # links2 = findRelevantLinks(query2, 10)
+   # print("Links 2: {0}".format(links2))   
 
 if __name__ == "__main__":
    test()
