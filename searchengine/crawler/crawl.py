@@ -8,9 +8,7 @@ import PyPDF2
 import sys
 sys.path.insert(0, '../../../')
 import searchengine.database.search_engine_db as db
-import searchengine.database.update_tables as update_db
 import searchengine.crawler.stack as stack
-import searchengine.algorithms.PageRank as pr
 import signal
 
 class timeout:
@@ -28,14 +26,14 @@ class timeout:
 # ignore image files and non csc.calpoly.edu urls and
 # the visited links
 def check_tag(tag, visited):
-	return (("mailto" not in tag) and (".jpg" not in tag) and (".jpeg" not in tag) and 
-		(".png" not in tag) and (".gif" not in tag) and (".exe" not in tag) and ("csc.calpoly.edu" in tag) and 
+	return (("mailto" not in tag) and (".jpg" not in tag) and (".jpeg" not in tag) and
+		(".png" not in tag) and (".gif" not in tag) and (".exe" not in tag) and ("csc.calpoly.edu" in tag) and
 		(tag not in visited))
 
 # ignore image files and non csc.calpoly.edu urls but
 # don't worry about visited links
 def check_tag_without_visited(tag):
-	return (("mailto" not in tag) and (".jpg" not in tag) and (".jpeg" not in tag) and 
+	return (("mailto" not in tag) and (".jpg" not in tag) and (".jpeg" not in tag) and
 		(".png" not in tag) and (".gif" not in tag) and (".exe" not in tag) and ("csc.calpoly.edu" in tag))
 
 # Input = [word1, word2, ...]
@@ -43,7 +41,7 @@ def check_tag_without_visited(tag):
 def index_one_file(baselink, term_list):
    # List of tuples (word, position)
 	word_list = []
-	
+
 	for index, word in enumerate(term_list):
 		if len(word) == 0:
 			continue
@@ -67,18 +65,19 @@ def read_pdf_file(url):
 
 def crawl():
 	urls = [url.split("\n")[0] for url in stack.get_stack()] # stack of urls to scrape
-	
-	# The first url we're crawling needs to be marked as already visited. 
+
+	# The first url we're crawling needs to be marked as already visited.
 	# Otherwise if the page contained a link to itself, we'd crawl it twice.
 	visited = ["https://csc.calpoly.edu/"]
 
 	exclude = set(string.punctuation)
+	url_map = {}
 
 	html_text = ""
 
 	max_links = 0
 
-	while len(urls) > 0 and max_links < 2000:	
+	while len(urls) > 0:
 		max_links += 1
 		print("Num Visited:",max_links,"Link:",urls[0])
 
@@ -132,7 +131,7 @@ def crawl():
 
 				url_top = urls[0]
 
-				links_to_add = []
+				url_map[url_top] = []
 
 				urls.pop(0)
 
@@ -141,21 +140,18 @@ def crawl():
 				for tag in soup.findAll('a', href=True):
 					tag['href'] = urljoin("https://csc.calpoly.edu/", tag['href'])
 
-					# check if the url is valid not worrying about visited, 
+					# check if the url is valid not worrying about visited,
 					# this is to get the mapping from a link to get
 					if check_tag_without_visited(tag['href']):
-						links_to_add.append(tag['href'])
-					
-				update_db.addLink(url_top, tag['href'])
+						url_map[url_top].append(tag['href'])
 
 				for tag in soup.findAll('a', href=True):
 					tag['href'] = urljoin("https://csc.calpoly.edu/", tag['href'])
-					
-					# check if the url is valid and has not been visited 
+
+					# check if the url is valid and has not been visited
 					if check_tag(tag['href'], visited):
 						urls.append(tag['href'])
 						visited.append(tag['href'])
-						
 		except Exception as e:
 			print(str(e))
 			urls.pop(0)
@@ -164,18 +160,7 @@ def crawl():
 	return visited
 
 def main():
-	visited = crawl()
-
-	# page rank
-	in_links = db.getInlinks(visited)
-	out_links = db.getNumOutlinks(visited)
-
-	all_pages = pr.AllPages(in_links, out_links)
-
-	link_page_ranks = pr.pagerank(all_pages)
-
-	# insert page rank data into DB
-	db.updatePageRank(link_page_ranks)
+	crawl()
 
 if __name__ == "__main__":
 	db.init_db()
