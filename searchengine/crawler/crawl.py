@@ -146,7 +146,8 @@ def crawl():
 					if check_tag_without_visited(tag['href']):
 						links_to_add.append(tag['href'])
 					
-				update_db.addLink(url_top, tag['href'])
+				if links_to_add:
+					update_db.addLinks(url_top, links_to_add)
 
 				for tag in soup.findAll('a', href=True):
 					tag['href'] = urljoin("https://csc.calpoly.edu/", tag['href'])

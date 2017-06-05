@@ -128,29 +128,40 @@ def getMaxFreq(links):
    except MySQLError as err:
       print(err)
 
-# Returns a list of links that link the parameter `link`
-def getInlinks(links):
+# Returns a dictionary for links and their inlinks.
+# If the links parameter is empty is will fetch all links
+def getInlinks(links=None):
    try:
-      if not links:
-         return {}
-
       with db_connection.connection.cursor() as cur:
-         param_string = ','.join(['%s'] * len(links))
+         if links:
+            param_string = ','.join(['%s'] * len(links))
 
-         sql = '''
-            SELECT
-               BASE.link AS baselink,
-               INLINK.link AS inlink
-            FROM
-               Hyperlinks AS H
-               INNER JOIN Links AS BASE ON H.hyperlink = BASE.id
-               INNER JOIN Links AS INLINK ON H.baselink = INLINK.id
-            WHERE
-               BASE.link IN (''' + param_string + ''')'''
+            sql = '''
+               SELECT
+                  BASE.link AS baselink,
+                  INLINK.link AS inlink
+               FROM
+                  Hyperlinks AS H
+                  INNER JOIN Links AS BASE ON H.hyperlink = BASE.id
+                  INNER JOIN Links AS INLINK ON H.baselink = INLINK.id
+               WHERE
+                  BASE.link IN (''' + param_string + ''')'''
 
-         cur.execute(sql, links)
+            cur.execute(sql, links)
+         else:
+            sql = '''
+               SELECT
+                  BASE.link AS baselink,
+                  INLINK.link AS inlink
+               FROM
+                  Hyperlinks AS H
+                  INNER JOIN Links AS BASE ON H.hyperlink = BASE.id
+                  INNER JOIN Links AS INLINK ON H.baselink = INLINK.id
+            '''
+
+            cur.execute(sql)
+
          records = cur.fetchall()
-
          inlinks = {}
          for record in records:
             if record['baselink'] in inlinks:
@@ -158,43 +169,60 @@ def getInlinks(links):
             else:
                inlinks[record['baselink']] = [record['inlink']]
 
-         # Ensure that all links will be in output dictionary
-         [inlinks.update({l:[]}) for l in links if l not in inlinks]
+         if links:
+            # Ensure that all links given will be in output dictionary
+            [inlinks.update({l:[]}) for l in links if l not in inlinks]
+
          return inlinks
 
    except MySQLError as err:
       print(err)
 
-# Returns the number of outlinks linked from `link`
-def getNumOutlinks(links):
+# Returns a dictionary of links and the number of outlinks they contain.
+# If the links parameter is empty is will fetch all links
+def getNumOutlinks(links=None):
    try:
-      if not links:
-         return {}
-
       with db_connection.connection.cursor() as cur:
-         param_string = ','.join(['%s'] * len(links))
+         if links:
+            param_string = ','.join(['%s'] * len(links))
 
-         sql = '''
-            SELECT
-               link AS baselink,
-               COUNT(*) AS numOutlinks
-            FROM
-               Links AS L
-               INNER JOIN Hyperlinks AS H ON L.id = H.baselink
-            WHERE
-               L.link IN (''' + param_string + ''')
-            GROUP BY
-               L.link
-         '''
+            sql = '''
+               SELECT
+                  link AS baselink,
+                  COUNT(*) AS numOutlinks
+               FROM
+                  Links AS L
+                  INNER JOIN Hyperlinks AS H ON L.id = H.baselink
+               WHERE
+                  L.link IN (''' + param_string + ''')
+               GROUP BY
+                  L.link
+            '''
 
-         cur.execute(sql, links)
+            cur.execute(sql, links)
+         else:
+            sql = '''
+               SELECT
+                  link AS baselink,
+                  COUNT(*) AS numOutlinks
+               FROM
+                  Links AS L
+                  INNER JOIN Hyperlinks AS H ON L.id = H.baselink
+               GROUP BY
+                  L.link
+            '''
+
+            cur.execute(sql)
+
          records = cur.fetchall()
          numOutlinks = {}
          for record in records:
             numOutlinks[record['baselink']] = int(record['numOutlinks'])
 
-         # Ensure that all links will be in output dictionary
-         [numOutlinks.update({l:0}) for l in links if l not in numOutlinks]
+         if links:
+            # Ensure that all links will be in output dictionary
+            [numOutlinks.update({l:0}) for l in links if l not in numOutlinks]
+
          return numOutlinks
 
    except MySQLError as err:
