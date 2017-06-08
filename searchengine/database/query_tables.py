@@ -165,9 +165,15 @@ def getInlinks(links=None):
          inlinks = {}
          for record in records:
             if record['baselink'] in inlinks:
-               inlinks[record['baselink']].append(record['inlink'])
+               if record['inlink']:
+                  inlinks[record['baselink']].append(record['inlink'])
+               else:
+                  inlinks[record['baselink']].append([])
             else:
-               inlinks[record['baselink']] = [record['inlink']]
+               if record['inlink']:
+                  inlinks[record['baselink']] = [record['inlink']]
+               else:
+                  inlinks[record['baselink']] = []
 
          if links:
             # Ensure that all links given will be in output dictionary

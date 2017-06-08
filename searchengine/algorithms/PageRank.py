@@ -11,8 +11,6 @@ class AllPages:
 def pagerank(pages, dampening = .85, epsilon = .000001):
 
    links = pages.inLinks.keys()
-   print('NUM IN:', len(pages.inLinks.keys()))
-   print('NUM OUT:', len(pages.numberOfOutLinks.keys()))
    n = len(links)
    linkIndex = {}
 
@@ -31,14 +29,14 @@ def pagerank(pages, dampening = .85, epsilon = .000001):
 
       danglingProduct = 0
       for i, link in enumerate(links):
-         if link not in pages.numberOfOutLinks:
+         if pages.numberOfOutLinks[link] == 0:
             danglingProduct += p[i]
 
       for i, link in enumerate(links):
 
          linkSum = 0
          for inLink in pages.inLinks[link]:
-            if inLink in pages.numberOfOutLinks:
+            if (pages.numberOfOutLinks[inLink] != 0):
                linkSum += p[linkIndex[inLink]]/pages.numberOfOutLinks[inLink]
 
          sA = dampening * linkSum
@@ -51,8 +49,8 @@ def pagerank(pages, dampening = .85, epsilon = .000001):
       absChange = numpy.abs(oldP-p)
       converganceChange = numpy.sum(absChange)
       numIterations += 1
-      print (converganceChange)
-      print (numIterations)
+      print ('Iteration:', numIterations, end=' ')
+      print ('Conversion delta:', converganceChange)
 
    print (p)
    rankDict = {}
@@ -73,6 +71,7 @@ def main():
 
 	# insert page rank data into DB
 	db.updatePageRank(link_page_ranks)
+	db.db_connection.connection.commit()
 
 if __name__ == "__main__":
 	db.init_db()
