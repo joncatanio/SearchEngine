@@ -78,24 +78,26 @@ def crawl():
 
 	while len(urls) > 0:
 		max_links += 1
-		print("Num Visited:",max_links,"Link:",urls[0])
+		print("   Link: \033[36m\'" + str(urls[0]) + "\'\033[0m")
 
 		# set the text to parse by beautiful soup to that of
 		# a pdf if found, or just the page itself
 		if ".pdf" in urls[0]:
 			try:
+				print("\033[32m", end=" ")
 				file_name = wget.download(urls[0])
 				html_text = read_pdf_file(urls[0].split("/")[-1])
 				os.remove(urls[0].split("/")[-1])
+				print("\033[0m", end=" ")
 			except Exception as e:
-				print(str(e))
+				print("\033[33m" + str(e) + "\033[0m")
 				urls.pop(0)
 				continue
 		else:
 			try:
 				html_text = urlopen(urls[0], timeout=20).read()
 			except Exception as e:
-				print(str(e))
+				print("\033[33m" + str(e) + "\033[0m")
 				urls.pop(0)
 				continue
 
@@ -130,11 +132,12 @@ def crawl():
 
 				url_top = urls[0]
 
+				links_to_add = []
 				url_map[url_top] = []
 
 				urls.pop(0)
 
-				print("num urls:", len(urls))
+				print("Visited:", max_links, "-- URL Stack:", len(urls))
 
 				for tag in soup.findAll('a', href=True):
 					tag['href'] = urljoin("https://csc.calpoly.edu/", tag['href'])
@@ -145,7 +148,7 @@ def crawl():
 						links_to_add.append(tag['href'])
 					
 				if links_to_add:
-					update_db.addLinks(url_top, links_to_add)
+					db.addLinks(url_top, links_to_add)
 
 				for tag in soup.findAll('a', href=True):
 					tag['href'] = urljoin("https://csc.calpoly.edu/", tag['href'])
@@ -155,7 +158,7 @@ def crawl():
 						urls.append(tag['href'])
 						visited.append(tag['href'])
 		except Exception as e:
-			print(str(e))
+			print("\033[33m" + str(e) + "\033[0m")
 			urls.pop(0)
 			continue
 
