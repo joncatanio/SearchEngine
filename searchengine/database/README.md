@@ -29,10 +29,10 @@ Endpoints for querying all the database tables.
 `getMaxFreq(link)` - This method returns the maximum frequency achieved by any word for a given link.
 - `link` - string representing the link to search for
 
-`getInlinks(links)` - This method returns a dictionary in the form `{'link': ['inlinks', ...], ...}`
+`getInlinks(links=None)` - This method returns a dictionary in the form `{'link': ['inlinks', ...], ...}`. If the this method is called without the parameter it will return a dictionary containing all links from the `Links` table and makes the gurantee that all links will be included and at least an empty list will be returned as a value from any given key.
 - `links` - list of links to find the inlinks for, each link is a key into the returned dictionary, all links will be present in the dictionary as an empty or populated list
 
-`getNumOutlinks(links)` - This method returns a dictionary in the form `{'link': integer, ...}`
+`getNumOutlinks(links=None)` - This method returns a dictionary in the form `{'link': integer, ...}`. If the this method is called without the parameter it will return a dictionary containing all links from the `Links` table and makes the gurantee that all links will be included and at least a 0 will be returned as a value from any given key.
 - `links` - list of links to find the number of outlinks for, each link is a key into the returned dictionary, all links will be present in the dictionary as a `0` or integer
 
 ### update_tables.py
