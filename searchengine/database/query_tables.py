@@ -155,8 +155,8 @@ def getInlinks(links=None):
                   INLINK.link AS inlink
                FROM
                   Hyperlinks AS H
-                  INNER JOIN Links AS BASE ON H.hyperlink = BASE.id
                   INNER JOIN Links AS INLINK ON H.baselink = INLINK.id
+                  RIGHT JOIN Links AS BASE ON H.hyperlink = BASE.id
             '''
 
             cur.execute(sql)
@@ -203,13 +203,22 @@ def getNumOutlinks(links=None):
          else:
             sql = '''
                SELECT
-                  link AS baselink,
-                  COUNT(*) AS numOutlinks
+                  L.link as baselink,
+                  IFNULL(B.numOutlinks, 0) AS numOutlinks
                FROM
                   Links AS L
-                  INNER JOIN Hyperlinks AS H ON L.id = H.baselink
-               GROUP BY
-                  L.link
+                  LEFT JOIN (
+                     SELECT
+                        id AS linkId,
+                        link AS baselink,
+                        COUNT(*) AS numOutlinks
+                     FROM
+                        Links AS L
+                        INNER JOIN Hyperlinks AS H ON L.id = H.baselink
+                     GROUP BY
+                        L.id,
+                        L.link
+                  ) AS B ON L.id = B.linkId
             '''
 
             cur.execute(sql)

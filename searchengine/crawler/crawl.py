@@ -6,7 +6,6 @@ from bs4 import BeautifulSoup
 import string
 import PyPDF2
 import sys
-sys.path.insert(0, '../../../')
 import searchengine.database.search_engine_db as db
 import searchengine.crawler.stack as stack
 import signal
