@@ -88,7 +88,7 @@ def crawl():
 				file_name = wget.download(urls[0])
 				html_text = read_pdf_file(urls[0].split("/")[-1])
 				os.remove(urls[0].split("/")[-1])
-				print("\033[0m", end=" ")
+				print("\033[0m")
 			except Exception as e:
 				print("\033[33m" + str(e) + "\033[0m")
 				urls.pop(0)
@@ -165,10 +165,12 @@ def crawl():
 	return visited
 
 def main():
-	crawl()
-
-if __name__ == "__main__":
 	db.init_db()
 	db.start_crawl_transaction()
-	main()
+	crawl()
+	print('\n-- Crawl Complete --')
+	print('Finishing Database Transaction')
 	db.finish_crawl_transaction()
+
+if __name__ == "__main__":
+	main()
