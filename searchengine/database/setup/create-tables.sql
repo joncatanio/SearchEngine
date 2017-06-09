@@ -38,3 +38,5 @@ CREATE INDEX WordIndex ON Words(word);
 CREATE INDEX LinkIndex ON Links(link);
 CREATE INDEX BaselinkIndex ON Hyperlinks(baselink);
 CREATE INDEX HyperlinkIndex ON Hyperlinks(hyperlink);
+CREATE INDEX WordMetaWIndex ON WordMeta(wordId);
+CREATE INDEX WordMetaLIndex ON WordMeta(linkId);

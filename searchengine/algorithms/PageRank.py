@@ -1,5 +1,6 @@
 import numpy
 import math
+import searchengine.database.search_engine_db as db
 
 class AllPages:
    def __init__(self, inLinks, numberOfOutLinks):
@@ -48,8 +49,8 @@ def pagerank(pages, dampening = .85, epsilon = .000001):
       absChange = numpy.abs(oldP-p)
       converganceChange = numpy.sum(absChange)
       numIterations += 1
-      print (converganceChange)
-      print (numIterations)
+      print ('Iteration:', numIterations, end=' ')
+      print ('Conversion delta:', converganceChange)
 
    print (p)
    rankDict = {}
@@ -58,5 +59,20 @@ def pagerank(pages, dampening = .85, epsilon = .000001):
 
    return rankDict
 
+def main():
 
+	# page rank
+	in_links = db.getInlinks()
+	out_links = db.getNumOutlinks()
 
+	all_pages = AllPages(in_links, out_links)
+
+	link_page_ranks = pagerank(all_pages)
+
+	# insert page rank data into DB
+	db.updatePageRank(link_page_ranks)
+	db.db_connection.connection.commit()
+
+if __name__ == "__main__":
+	db.init_db()
+	main()
