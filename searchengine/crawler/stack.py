@@ -1,5 +1,5 @@
 import sys
-from config import key, cse_id
+from searchengine.crawler.config import key, cse_id
 from googleapiclient.discovery import build
 
 def google_search(search_term, api_key, cse_id, **kwargs):

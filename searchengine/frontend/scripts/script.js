@@ -45,8 +45,8 @@ function display_results(data, meta) {
                 + item['link'];
                 
 
-        if (item['link'].search("users.") !== -1) {
-            new_div += " <span class='profpage'>Professor page</span>";
+        if (item['link'].search("~") !== -1) {
+            new_div += " <span class='profpage'>Professor/User page</span>";
         }
 
         new_div += "<br><p>" + item['des'] + "</p></div>";
