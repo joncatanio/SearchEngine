@@ -123,7 +123,12 @@ def crawl():
 				# join the text so it is a single string
 				text = ''.join(ch for ch in text if ch not in exclude)
 				# remove some special characters found to be prevalent
-				text = text.replace('\n', ' ').replace('\r', '').replace(u'\xa0', u' ')
+				text = text.replace('\n', ' ').replace(u'\xa0', u' ')
+
+				# remove characters that are not alphanumeric or . or _ or -
+				for ch in text:
+					if not ch.isalnum() or ch != '.' or ch != '_' or ch != '-':
+						text.replace(ch, '')
 
 				term_list = text.split(' ')
 
