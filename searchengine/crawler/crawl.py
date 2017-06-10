@@ -9,6 +9,7 @@ import sys
 import searchengine.database.search_engine_db as db
 import searchengine.crawler.stack as stack
 import signal
+import re
 
 class timeout:
     def __init__(self, seconds=20, error_message='Timeout'):
@@ -27,13 +28,14 @@ class timeout:
 def check_tag(tag, visited):
 	return (("mailto" not in tag) and (".jpg" not in tag) and (".jpeg" not in tag) and
 		(".png" not in tag) and (".gif" not in tag) and (".exe" not in tag) and ("csc.calpoly.edu" in tag) and
-		(tag not in visited))
+		("web.archive" not in tag) and (tag not in visited))
 
 # ignore image files and non csc.calpoly.edu urls but
 # don't worry about visited links
 def check_tag_without_visited(tag):
 	return (("mailto" not in tag) and (".jpg" not in tag) and (".jpeg" not in tag) and
-		(".png" not in tag) and (".gif" not in tag) and (".exe" not in tag) and ("csc.calpoly.edu" in tag))
+		(".png" not in tag) and (".gif" not in tag) and (".exe" not in tag) and ("csc.calpoly.edu" in tag) and
+		("web.archive" not in tag))
 
 # Input = [word1, word2, ...]
 # Updates database returns nothing
@@ -42,10 +44,10 @@ def index_one_file(baselink, term_list):
 	word_list = []
 
 	for index, word in enumerate(term_list):
-		if len(word) == 0:
+		if len(word.strip()) == 0:
 			continue
 
-		word_list.append((word, index))
+		word_list.append((word.strip(), index))
 
 	db.addWords(baselink, word_list)
 
@@ -124,11 +126,8 @@ def crawl():
 				text = ''.join(ch for ch in text if ch not in exclude)
 				# remove some special characters found to be prevalent
 				text = text.replace('\n', ' ').replace(u'\xa0', u' ')
-
-				# remove characters that are not alphanumeric or . or _ or -
-				for ch in text:
-					if not ch.isalnum() or ch != '.' or ch != '_' or ch != '-':
-						text.replace(ch, '')
+				# remove characters that are not alphanumeric or . or - or _
+				text = re.sub(r'[^a-zA-Z0-9.-_]', ' ', text)
 
 				term_list = text.split(' ')
 
