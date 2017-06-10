@@ -167,6 +167,10 @@ def crawl():
 			urls.pop(0)
 			continue
 
+	   # Every 1000 links visited lets commit the transaction
+		if max_links % 1000 == 0:
+			db.db_connection.connection.commit()
+
 	return visited
 
 def main():
