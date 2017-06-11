@@ -131,7 +131,7 @@ def crawl():
 				# remove some special characters found to be prevalent
 				text = text.replace('\n', ' ').replace(u'\xa0', u' ')
 				# remove characters that are not alphanumeric or . or - or _
-				text = re.sub(r'[^a-zA-Z0-9.-_]', ' ', text)
+				text = re.sub(r'[^a-zA-Z0-9.-_ ]', ' ', text)
 
 				term_list = text.split(' ')
 
