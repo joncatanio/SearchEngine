@@ -24,7 +24,7 @@ def start_crawl_transaction():
 
          cur.execute(sql)
    except MySQLError as err:
-      print(err)
+      print('start_crawl_transaction:', err)
 
 # Finishes the entire crawl transaction moving newly found data into the
 # WordMeta table and deleting the temporary WordMetaTemp table until next crawl.
@@ -46,7 +46,7 @@ def finish_crawl_transaction():
       # Commit all crawl transactions
       db_connection.connection.commit()
    except MySQLError as err:
-      print(err)
+      print('finish_crawl_transaction:', err)
 
 # Adds the baselink if necessary
 def _addBaseLink(baselink):
@@ -62,7 +62,7 @@ def _addBaseLink(baselink):
 
          cur.execute(sql, baselink)
    except MySQLError as err:
-      print(err)
+      print('_addBaseLink:', err)
 
 # Inserts words into the Words and WordMetaTemp table, allows for batching each
 # page. This can be extended to take in a map if necessary for further batching.
@@ -105,7 +105,7 @@ def addWords(baselink, words):
 
             cur.execute(sql, [word[0], baselink, word[1]])
    except MySQLError as err:
-      print(err)
+      print('addWords:', err)
 
 # Inserts links into the Links table, allows for batching each page. This can
 # be extended to take in a map if necessary for further batching.
@@ -143,7 +143,7 @@ def addLinks(baselink, links):
 
             cur.execute(sql, [baselink, link])
    except MySQLError as err:
-      print(err)
+      print('addLinks:', err)
 
 # Inserts the PageRank values into the Links table
 #    links - dictionary of {link: pageRank} to update the Links table with
@@ -161,4 +161,4 @@ def updatePageRank(links):
          cur.executemany(sql, lst)
 
    except MySQLError as err:
-      print(err)
+      print('updatePageRank:', err)
