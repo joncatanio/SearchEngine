@@ -9,16 +9,15 @@ import signal
 
 app = Flask(__name__)
 
-@app.route('/search/<query>/', methods = ['GET'])
-def search(query):
+@app.route('/search/<query>/<pr_flag>/', methods = ['GET'])
+def search(query, pr_flag):
     start = datetime.now()
-
-    links = TF_IDF.findRelevantLinks(query, 10)
+    print(pr_flag)
+    links = TF_IDF.findRelevantLinks(query, 10, pr_flag)
 
     results = []
 
     for link in links:
-        print(link)
         signal.alarm(2)
         title = None
         try:
