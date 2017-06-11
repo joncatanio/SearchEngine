@@ -28,14 +28,16 @@ class timeout:
 def check_tag(tag, visited):
 	return (("mailto" not in tag) and (".jpg" not in tag) and (".jpeg" not in tag) and
 		(".png" not in tag) and (".gif" not in tag) and (".exe" not in tag) and ("csc.calpoly.edu" in tag) and
-		("web.archive" not in tag) and (".zip" not in tag) and ("accounts.google" not in tag) and (".ppt" not in tag) and (tag not in visited))
+		("web.archive" not in tag) and (".zip" not in tag) and ("accounts.google" not in tag) and (".ppt" not in tag)
+		and (".mov" not in tag) and (tag not in visited))
 
 # ignore image files and non csc.calpoly.edu urls but
 # don't worry about visited links
 def check_tag_without_visited(tag):
 	return (("mailto" not in tag) and (".jpg" not in tag) and (".jpeg" not in tag) and
 		(".png" not in tag) and (".gif" not in tag) and (".exe" not in tag) and ("csc.calpoly.edu" in tag) and
-		("web.archive" not in tag) and (".zip" not in tag) and ("accounts.google" not in tag) and (".ppt" not in tag))
+		("web.archive" not in tag) and (".zip" not in tag) and ("accounts.google" not in tag) and (".ppt" not in tag)
+		and (".mov" not in tag))
 
 # Input = [word1, word2, ...]
 # Updates database returns nothing
@@ -148,7 +150,7 @@ def crawl():
 				print("Visited:", max_links, "-- URL Stack:", len(urls))
 
 				for tag in soup.findAll('a', href=True):
-					tag['href'] = urljoin("https://csc.calpoly.edu/", tag['href'])
+					tag['href'] = urljoin(url_top, tag['href'])
 
 					# check if the url is valid not worrying about visited,
 					# this is to get the mapping from a link to get
@@ -159,7 +161,7 @@ def crawl():
 					db.addLinks(url_top, links_to_add)
 
 				for tag in soup.findAll('a', href=True):
-					tag['href'] = urljoin("https://csc.calpoly.edu/", tag['href'])
+					tag['href'] = urljoin(url_top, tag['href'])					
 
 					# check if the url is valid and has not been visited
 					if check_tag(tag['href'], visited):
