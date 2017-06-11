@@ -274,7 +274,7 @@ def findRelevantLinks(query, n, usePageRank, usePhraseSearch = True, useCosineSi
       links = rankLinks(queryWeights, linkWeightsList, usePageRank, useCosineSimilarity)
 
    # Return the top n links
-   print(links[:n])
+   # print(links[:n])
    return [link[0] for link in links[:n]]
 
 def test():
