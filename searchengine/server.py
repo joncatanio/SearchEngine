@@ -13,7 +13,7 @@ app = Flask(__name__)
 def search(query):
     start = datetime.now()
 
-    links = TF_IDF.findRelevantLinks(query, 10)
+    links = TF_IDF.findRelevantLinks(query, 10, True)
 
     results = []
 

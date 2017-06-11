@@ -29,13 +29,98 @@ def wordsFromQuery(query):
    return words
 
 # Find all links that contain at least one of the given words
+# {link: (PageRank score, [words])}
 def linksForQuery(words):
-   links = db.getLinks(words)
-   return links if links else []
+   links = {}
+   for word in set(words):
+      for link, PRWeight in db.getLinks([word]):
+         if link in links:
+            links[link] = (links[link][0], links[link][1].append(word))
+         else:
+            links[link] = (PRWeight, [word])
+   return links
+
+def tfidfLinkPhrase(words, linkDict, numLinksTotal, wordFreqs, maxWordFreq):
+   # Find the number of links that contain all the words in the phrase
+   # TODO: this can be optimized by pulling it out of this method and calculating it fewer times
+   numLinksWithPhrase = 0
+   for link in linkDict:
+      linkContainsPhrase = True
+      for word in set(words):
+         pageRankWeight, linkWords = linkDict[link]
+         # If a phrase word is not in the link, break
+         if not linkWords or word not in linkWords:
+            linkContainsPhrase = False
+            break
+      # If the link contains all phrase words, then increment counter
+      if linkContainsPhrase:
+         numLinksWithPhrase += 1
+
+   # Find the frequency of the phrase in this link (min freq of any word in the phrase)
+   phraseFreq = None
+   for word in words:
+      pageRankWeight, linkWords = linkDict[link]
+      # If a phrase word is not in the link, break
+      if word not in linkWords:
+         phraseFreq = 0
+         break
+      # Otherwise check if the word frequency is less than the min so far
+      else:
+         if not phraseFreq:
+            phraseFreq = wordFreqs[word]
+         else:
+            if wordFreqs[word] < phraseFreq:
+               phraseFreq = wordFreqs[word]
+
+   # Calculate TF
+   tf = 0
+   if maxWordFreq != 0:
+      tf = 0.5 + 0.5 * phraseFreq / maxWordFreq
+
+   # Calculate IDF
+   idf = 0
+   if numLinksWithPhrase != 0:
+      idf = math.log(numLinksTotal / numLinksWithPhrase)
+
+   # Return TF-IDF
+   tfidf = tf * idf
+   return tfidf
+
+def tfidfQueryPhrase(queryWords, phraseWords, linkDict, numLinksTotal, maxWordFreq):
+   # Find the number of links that contain all the words in the phrase
+   numLinksWithPhrase = 0
+   for link in linkDict:
+      linkContainsPhrase = True
+      for word in set(phraseWords):
+         pageRankWeight, linkWords = linkDict[link]
+         # If a phrase word is not in the link, break
+         if not linkWords or word not in linkWords:
+            linkContainsPhrase = False
+            break
+      # If the link contains all phrase words, then increment counter
+      if linkContainsPhrase:
+         numLinksWithPhrase += 1
+
+   # Find the frequency of the phrase in this link (min freq of any word in the phrase)
+   phraseFreq = min([queryWords.count(w) for w in set(phraseWords)])
+
+   # Calculate TF
+   tf = 0.5 + 0.5 * phraseFreq / maxWordFreq
+
+   # Calculate IDF
+   idf = 0
+   if numLinksWithPhrase != 0:
+      idf = math.log(numLinksTotal / numLinksWithPhrase)
+
+   # Return TF-IDF
+   tfidf = tf * idf
+   return tfidf
 
 # Caculate the TF-IDF weight for a given link and given word
-def tf_idf(words, link, pageRankWeight, numDBLinks, numLinksPerWord, maxWordFreq, wordFreqs):
+def tfidfLink(words, linkDict, numLinksPerWord, numLinksTotal, wordFreqs, maxWordFreq, usePhraseSearch):
    weights = []
+
+   # Calculate the TF-IDF weight for each word in the search query
    for word in words:
       # Calculate TF
       tf = 0
@@ -46,30 +131,43 @@ def tf_idf(words, link, pageRankWeight, numDBLinks, numLinksPerWord, maxWordFreq
       # Calculate IDF
       idf = 0
       if word in numLinksPerWord and numLinksPerWord[word] != 0:
-         idf = math.log(numDBLinks / numLinksPerWord[word])
+         idf = math.log(numLinksTotal / numLinksPerWord[word])
 
       # Return TF-IDF
       tfidf = tf * idf
-      weight = tfidf * float(pageRankWeight)
-      weights.append(tf * idf)
+      weights.append(tfidf)
+
+   # If there were multiple words in the query and usePhraseSearch is enabled,
+   # calculate an additional weight for each sequential phrase of 2+ words
+   if usePhraseSearch and len(words) > 1:
+      weights.append(tfidfLinkPhrase(words, linkDict, numLinksTotal, wordFreqs, maxWordFreq))
+   
    return weights
 
 # Calculate the TF-IDF for the search query
-def tf_idf_query(words, numDBLinks, numLinksPerWord):
-   maxWordFreq = max([words.count(w) for w in set(words)])
+def tfidfQuery(words, linkDict, numLinksTotal, numLinksPerWord, usePhraseSearch):
+   wordFreqs = {w:words.count(w) for w in set(words)}
+   maxWordFreq = max(wordFreqs.values())
    weights = []
+
+   # Calculate the TF-IDF weight for each word in the search query
    for word in words:
       # Calculate TF
-      wordFreq = words.count(word)
-      tf = 0.5 + 0.5 * wordFreq / maxWordFreq
+      tf = 0.5 + 0.5 * wordFreqs[word] / maxWordFreq
 
       # Calculate IDF
       idf = 0
       if word in numLinksPerWord and numLinksPerWord[word] != 0:
-         idf = math.log(numDBLinks / numLinksPerWord[word])
+         idf = math.log(numLinksTotal / numLinksPerWord[word])
 
       # Calculate TF-IDF
       weights.append(tf * idf)
+
+   # If there were multiple words in the query and usePhraseSearch is enabled,
+   # calculate an additional weight for each sequential phrase of 2+ words
+   if usePhraseSearch and len(words) > 1:
+      weights.append(tfidfQueryPhrase(words, words, linkDict, numLinksTotal, maxWordFreq))
+   
    return weights
 
 # Calculate the dot product between two vectors
@@ -94,29 +192,61 @@ def cosineSimilarity(queryWeights, linkWeights):
 def harmonicMean(cosSim, pageRank):
    return 2 * (cosSim * pageRank) / (cosSim + pageRank)
 
+# Perform TF-IDF and return the link weights and the query weights
+def tfidf(words, linkDict, usePhraseSearch):
+   links = list(linkDict.keys())
+
+   # Get the necessary values for TF-IDF from the DB
+   numLinksTotal = db.getNumLinks()
+   numLinksPerWord = db.getNumLinks(set(words))
+   wordFreqPerLink = db.getFreq(list(set(words)), links)
+   maxWordFreqPerLink = db.getMaxFreq(links) # TODO: This info should maybe be extracted from wordFreqPerLink
+
+   # Perform TF-IDF to get the weights for each link
+   queryWeights = tfidfQuery(words, linkDict, numLinksTotal, numLinksPerWord, usePhraseSearch)
+   linkWeights = [(link, tfidfLink(words, linkDict, numLinksPerWord, numLinksTotal, wordFreqPerLink[link], maxWordFreqPerLink[link], usePhraseSearch), pageRankWeight) for (link, (pageRankWeight, _)) in linkDict.items()]
+   return queryWeights, linkWeights
+
+# Rank the links based on similarity to the search query
+def rankLinks(queryWeights, linkWeightsList, usePageRank):
+   # If PageRank is enabled, rank the links based on the harmonic mean between
+   # the PageRank score and the cosine similarity of the tfidf score to the query
+   if usePageRank:
+      linkSimilarityScores = [(link, harmonicMean(cosineSimilarity(queryWeights, linkWeights), float(pageRankWeight))) for (link, linkWeights, pageRankWeight) in linkWeightsList]
+   
+   # Otherwise, rank the links based on the cosine similarity of the tfidf score to the query
+   else:
+      linkSimilarityScores = [(link, cosineSimilarity(queryWeights, linkWeights)) for (link, linkWeights, pageRankWeight) in linkWeightsList]
+   
+   # Return the links sorted by similarity score (highest first)
+   return sorted(linkSimilarityScores, key=lambda entry: entry[1], reverse=True)
+
 # Find the top n relevant links for a given search query
-def findRelevantLinks(query, n):
+def findRelevantLinks(query, n, usePageRank):
+   usePhraseSearch = False
+
+   # Extract the words from the query string
    words = wordsFromQuery(query.strip().lower())
 
-   # Get the links with the search query terms and sort by cosine similarity
-   linksAndPRWeights = linksForQuery(words)
-   links = [link for (link, PRWeight) in linksAndPRWeights]
-   if links:
-      numDBLinks = db.getNumLinks()
-      numLinksPerWord = db.getNumLinks(words)
-      maxFreqPerLink = db.getMaxFreq(links)
-      wordFreqPerLink = db.getFreq(words, links)
+   # Get the links that contain at least one of the query terms
+   linkDict = linksForQuery(words)
+   links = []
 
-      queryWeights = tf_idf_query(words, numDBLinks, numLinksPerWord)      
-      linkWeights = [(link, tf_idf(words, link, PRWeight, numDBLinks, numLinksPerWord, maxFreqPerLink[link], wordFreqPerLink[link]), PRWeight) for (link, PRWeight) in linksAndPRWeights]
-      linkSimilarities = [(link, harmonicMean(cosineSimilarity(queryWeights, weights), float(PRWeight))) for (link, weights, PRWeight) in linkWeights]
-      links = sorted(linkSimilarities, key=lambda entry: entry[1], reverse=True)
+   # Check if any links exist
+   if len(linkDict) > 0:
+      # Perform TF-IDF to get the weights for each link
+      queryWeights, linkWeightsList = tfidf(words, linkDict, usePhraseSearch)
 
+      # Rank the links based on similarity to the search query
+      links = rankLinks(queryWeights, linkWeightsList, usePageRank)
+
+   # Return the top n links
+   print([link[0] for link in links[:n]])
    return [link[0] for link in links[:n]]
 
 def test():
    db.init_db()
-   cProfile.run('findRelevantLinks("computer", 10)')
+   cProfile.run('findRelevantLinks("aaron keen", 10, True)')
 
    # db.init_db()
    # query1 = "This is a possible search query"
