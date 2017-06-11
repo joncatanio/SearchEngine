@@ -73,7 +73,7 @@ def crawl():
 
 	# The first url we're crawling needs to be marked as already visited.
 	# Otherwise if the page contained a link to itself, we'd crawl it twice.
-	visited = ["https://csc.calpoly.edu/"]
+	visited = [url.split("\n")[0] for url in stack.get_stack()]
 
 	exclude = set(string.punctuation)
 	url_map = {}
