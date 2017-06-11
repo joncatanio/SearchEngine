@@ -6,7 +6,17 @@ var results_section = document.getElementById('results_section');
 function search(data) {
     if (!data) {
         /* we've just made a search, let's get the data */
-        make_request(search_input.value, search);
+        make_request(search_input.value, false, search);
+    } else {
+        /* we've recieved the data, let's load the results */
+        display_results(data['results'], data['meta']);
+    }
+}
+
+function prsearch(data) {
+    if (!data) {
+        /* we've just made a search, let's get the data */
+        make_request(search_input.value, true, search);
     } else {
         /* we've recieved the data, let's load the results */
         display_results(data['results'], data['meta']);
@@ -14,14 +24,14 @@ function search(data) {
 }
 
 // asynch GET request to endpoint.py
-function make_request(query, _callback) {
+function make_request(query, pr_flag, _callback) {
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function() { 
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
             _callback(JSON.parse(xmlHttp.responseText));
         }
     }
-    xmlHttp.open("GET", 'http://127.0.0.1:5000/search/' + query + "/", true); 
+    xmlHttp.open("GET", 'http://127.0.0.1:5000/search/' + query + "/" + pr_flag + "/", true); 
     xmlHttp.send(null);
 }
 
