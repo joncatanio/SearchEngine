@@ -41,9 +41,9 @@ def check_tag(tag, visited):
 
 	for _ in proper_urls:
 		if _ in tag:
-			return True
+			return (tag not in visited)
 
-	return (tag not in visited)
+	return False
 
 # ignore image files and non csc.calpoly.edu urls but
 # don't worry about visited links
