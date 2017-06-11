@@ -1,0 +1,11 @@
+mailto
+.jpg
+.jpeg
+.png
+.gif
+.exe
+web.archive
+.zip
+accounts.google
+.ppt
+.mov

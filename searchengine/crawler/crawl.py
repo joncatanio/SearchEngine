@@ -23,21 +23,43 @@ class timeout:
     def __exit__(self, type, value, traceback):
         signal.alarm(0)
 
+def read_config_file(file_name):
+    f = open(file_name, 'r')
+    file_lines = f.readlines()
+    f.close()
+    return [_.split("\n")[0] for _ in file_lines]
+
 # ignore image files and non csc.calpoly.edu urls and
 # the visited links
 def check_tag(tag, visited):
-	return (("mailto" not in tag) and (".jpg" not in tag) and (".jpeg" not in tag) and
-		(".png" not in tag) and (".gif" not in tag) and (".exe" not in tag) and ("csc.calpoly.edu" in tag) and
-		("web.archive" not in tag) and (".zip" not in tag) and ("accounts.google" not in tag) and (".ppt" not in tag)
-		and (".mov" not in tag) and (tag not in visited))
+	black_list = read_config_file("black_list.txt")
+	proper_urls = read_config_file("proper_urls.txt")
+
+	for _ in black_list:
+		if _ in tag:
+			return False
+
+	for _ in proper_urls:
+		if _ in tag:
+			return True
+
+	return (tag not in visited)
 
 # ignore image files and non csc.calpoly.edu urls but
 # don't worry about visited links
 def check_tag_without_visited(tag):
-	return (("mailto" not in tag) and (".jpg" not in tag) and (".jpeg" not in tag) and
-		(".png" not in tag) and (".gif" not in tag) and (".exe" not in tag) and ("csc.calpoly.edu" in tag) and
-		("web.archive" not in tag) and (".zip" not in tag) and ("accounts.google" not in tag) and (".ppt" not in tag)
-		and (".mov" not in tag))
+	black_list = read_config_file("black_list.txt")
+	proper_urls = read_config_file("proper_urls.txt")
+
+	for _ in black_list:
+		if _ in tag:
+			return False
+
+	for _ in proper_urls:
+		if _ in tag:
+			return True
+
+	return False
 
 # Input = [word1, word2, ...]
 # Updates database returns nothing
