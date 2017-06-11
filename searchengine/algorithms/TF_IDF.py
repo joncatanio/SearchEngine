@@ -40,6 +40,20 @@ def linksForQuery(words):
             links[link] = (PRWeight, [word])
    return links
 
+def calculateTFIDF(freq, maxFreq, numLinksWithTerm, numLinksTotal):
+   # Calculate TF
+   tf = 0
+   if maxFreq != 0:
+      tf = 0.5 + 0.5 * freq / maxFreq
+
+   # Calculate IDF
+   idf = 0
+   if numLinksWithTerm != 0:
+      idf = math.log(numLinksTotal / numLinksWithTerm)
+
+   # Return TF-IDF
+   return tf * idf
+
 def tfidfLinkPhrase(words, thisLink, linkDict, numLinksTotal, wordFreqs, maxWordFreq):
    # Find the number of links that contain all the words in the phrase
    # TODO: this can be optimized by pulling it out of this method and calculating it fewer times
@@ -72,19 +86,8 @@ def tfidfLinkPhrase(words, thisLink, linkDict, numLinksTotal, wordFreqs, maxWord
             if wordFreqs[word] < phraseFreq:
                phraseFreq = wordFreqs[word]
 
-   # Calculate TF
-   tf = 0
-   if maxWordFreq != 0:
-      tf = 0.5 + 0.5 * phraseFreq / maxWordFreq
-
-   # Calculate IDF
-   idf = 0
-   if numLinksWithPhrase != 0:
-      idf = math.log(numLinksTotal / numLinksWithPhrase)
-
    # Return TF-IDF
-   tfidf = tf * idf
-   return tfidf
+   return calculateTFIDF(phraseFreq, maxWordFreq, numLinksWithPhrase, numLinksTotal)
 
 def tfidfQueryPhrase(queryWords, phraseWords, linkDict, numLinksTotal, maxWordFreq):
    # Find the number of links that contain all the words in the phrase
@@ -104,17 +107,8 @@ def tfidfQueryPhrase(queryWords, phraseWords, linkDict, numLinksTotal, maxWordFr
    # Find the frequency of the phrase in this link (min freq of any word in the phrase)
    phraseFreq = min([queryWords.count(w) for w in set(phraseWords)])
 
-   # Calculate TF
-   tf = 0.5 + 0.5 * phraseFreq / maxWordFreq
-
-   # Calculate IDF
-   idf = 0
-   if numLinksWithPhrase != 0:
-      idf = math.log(numLinksTotal / numLinksWithPhrase)
-
    # Return TF-IDF
-   tfidf = tf * idf
-   return tfidf
+   return calculateTFIDF(phraseFreq, maxWordFreq, numLinksWithPhrase, numLinksTotal)
 
 # Caculate the TF-IDF weight for a given link and given word
 def tfidfLink(words, link, linkDict, numLinksPerWord, numLinksTotal, wordFreqs, maxWordFreq, usePhraseSearch):
@@ -216,41 +210,49 @@ def tfidf(words, linkDict, usePhraseSearch):
 def rankLinks(queryWeights, linkWeightsList, usePageRank, useCosineSimilarity):
    # If PageRank is enabled, rank the links based on the harmonic mean between
    # the PageRank score and the cosine similarity of the tfidf score to the query
-   usePageRank = False
    if usePageRank:
       # If there is only one word, use the distance between the values instead of cosine similarity
       # because cosine similarity will always return 1.0 in this case
       if len(queryWeights) == 1:
-         linkSimilarityScores = [(link, harmonicMean(abs(queryWeights[0] - linkWeights[0]), float(pageRankWeight))) for (link, linkWeights, pageRankWeight) in linkWeightsList]
+         linkSimilarityScores = [(link, abs(queryWeights[0] - linkWeights[0]), float(pageRankWeight)) for (link, linkWeights, pageRankWeight) in linkWeightsList]
+         maxScore = max([score[1] for score in linkSimilarityScores])
+         linkSimilarityScores = [(link, harmonicMean(1 - score / maxScore, pageRankWeight)) for link, score, pageRankWeight in linkSimilarityScores]
       else:
          if useCosineSimilarity:
-            linkSimilarityScores = [(link, harmonicMean(cosineSimilarity(queryWeights, linkWeights), float(pageRankWeight))) for (link, linkWeights, pageRankWeight) in linkWeightsList]
+            linkSimilarityScores = [(link, cosineSimilarity(queryWeights, linkWeights), float(pageRankWeight)) for (link, linkWeights, pageRankWeight) in linkWeightsList]
+            maxScore = max([score[1] for score in linkSimilarityScores])
+            linkSimilarityScores = [(link, harmonicMean(score / maxScore, pageRankWeight)) for link, score, pageRankWeight in linkSimilarityScores]
          else:
-            linkSimilarityScores = [(link, harmonicMean(euclideanDistance(queryWeights, linkWeights), float(pageRankWeight))) for (link, linkWeights, pageRankWeight) in linkWeightsList]
-   
+            linkSimilarityScores = [(link, euclideanDistance(queryWeights, linkWeights), float(pageRankWeight)) for (link, linkWeights, pageRankWeight) in linkWeightsList]
+            maxScore = max([score[1] for score in linkSimilarityScores])
+            linkSimilarityScores = [(link, harmonicMean(1 - score / maxScore, pageRankWeight)) for link, score, pageRankWeight in linkSimilarityScores]
+
    # Otherwise, rank the links based on the cosine similarity of the tfidf score to the query
    else:
       # If there is only one word, use the distance between the values instead of cosine similarity
       # because cosine similarity will always return 1.0 in this case
       if len(queryWeights) == 1:
          linkSimilarityScores = [(link, abs(queryWeights[0] - linkWeights[0])) for (link, linkWeights, pageRankWeight) in linkWeightsList]
+         maxScore = max([score[1] for score in linkSimilarityScores])
+         linkSimilarityScores = [(link, 1 - score / maxScore) for link, score in linkSimilarityScores]
       else:
          if useCosineSimilarity:
             linkSimilarityScores = [(link, cosineSimilarity(queryWeights, linkWeights)) for (link, linkWeights, pageRankWeight) in linkWeightsList]
+            maxScore = max([score[1] for score in linkSimilarityScores])
+            linkSimilarityScores = [(link, score / maxScore) for link, score in linkSimilarityScores]
          else:
             linkSimilarityScores = [(link, euclideanDistance(queryWeights, linkWeights)) for (link, linkWeights, pageRankWeight) in linkWeightsList]
-   
+            maxScore = max([score[1] for score in linkSimilarityScores])
+            linkSimilarityScores = [(link, 1 - score / maxScore) for link, score in linkSimilarityScores]
+
    # First sort the results by link length (shorter links tend to be better)
    sortedScores = sorted(linkSimilarityScores, key=lambda entry: len(entry[0]))
    
    # Return the links sorted by similarity score (best first)
-   if len(queryWeights) == 1:
-      sortedScores = sorted(sortedScores, key=lambda entry: (int)(1000000*entry[1]))
+   if usePageRank or useCosineSimilarity:
+      sortedScores = sorted(sortedScores, key=lambda entry: (int)(1000000*entry[1]), reverse=True)
    else:
-      if useCosineSimilarity:
-         sortedScores = sorted(sortedScores, key=lambda entry: (int)(1000000*entry[1]), reverse=True)
-      else:
-         sortedScores = sorted(sortedScores, key=lambda entry: (int)(1000000*entry[1]))
+      sortedScores = sorted(sortedScores, key=lambda entry: (int)(1000000*entry[1]))
    return sortedScores
 
 # Find the top n relevant links for a given search query
@@ -272,6 +274,7 @@ def findRelevantLinks(query, n, usePageRank, usePhraseSearch = True, useCosineSi
       links = rankLinks(queryWeights, linkWeightsList, usePageRank, useCosineSimilarity)
 
    # Return the top n links
+   print(links[:n])
    return [link[0] for link in links[:n]]
 
 def test():
