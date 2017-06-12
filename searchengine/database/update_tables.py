@@ -6,6 +6,7 @@ from pymysql import MySQLError
 # and when `finish_crawl_transaction` is called we truncate the production
 # tables and add the new information stoed in the temporary tables This allows
 # users to query our search engine while we crawl.
+# NOTICE: This does nothing for now, we had issues with large inserts
 def start_crawl_transaction():
    try:
       with db_connection.connection.cursor() as cur:
@@ -22,12 +23,13 @@ def start_crawl_transaction():
             );
          '''
 
-         cur.execute(sql)
+         #cur.execute(sql)
    except MySQLError as err:
       print('start_crawl_transaction:', err)
 
 # Finishes the entire crawl transaction moving newly found data into the
 # WordMeta table and deleting the temporary WordMetaTemp table until next crawl.
+# NOTICE: This simply commits for now, we had issues with large inserts
 def finish_crawl_transaction():
    try:
       with db_connection.connection.cursor() as cur:
@@ -41,7 +43,7 @@ def finish_crawl_transaction():
             DROP TABLE HyperlinksTemp;
          '''
 
-         cur.execute(sql)
+         #cur.execute(sql)
 
       # Commit all crawl transactions
       db_connection.connection.commit()
@@ -60,7 +62,7 @@ def _addBaseLink(baselink):
             ON DUPLICATE KEY UPDATE link=VALUES(link)
          '''
 
-         cur.execute(sql, baselink)
+         cur.execute(sql, [baselink])
    except MySQLError as err:
       print('_addBaseLink:', err)
 
@@ -95,7 +97,7 @@ def addWords(baselink, words):
       with db_connection.connection.cursor() as cur:
          for word in words:
             sql = '''
-               INSERT INTO WordMetaTemp
+               INSERT INTO WordMeta
                   (wordId, linkId, position)
                SELECT * FROM
                   (SELECT id FROM Words WHERE word = %s) AS W
@@ -134,7 +136,7 @@ def addLinks(baselink, links):
       with db_connection.connection.cursor() as cur:
          for link in links:
             sql = '''
-               INSERT INTO HyperlinksTemp
+               INSERT INTO Hyperlinks
                   (baselink, hyperlink)
                SELECT * FROM
                   (SELECT id FROM Links WHERE link = %s) AS B

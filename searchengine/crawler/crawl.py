@@ -74,10 +74,15 @@ def index_one_file(baselink, term_list):
 		word_list.append((word.strip(), index))
 
 	print("   \033[35mAdding " + str(len(word_list)) + " words\033[0m")
-	if len(word_list) > 10000:
-		db.addWords(baselink, word_list[:len(word_list)//2])
+	max_insert = 10000
+	if len(word_list) > max_insert:
+		i = 0
+		while i < len(word_list):
+			db.addWords(baselink, word_list[i:i + max_insert])
+			i += max_insert
+			db.db_connection.connection.commit()
 	else:
-		db.addWords(baselink, word_list[len(word_list)//2:])
+		db.addWords(baselink, word_list)
 
 # extracts text from pdf file
 def read_pdf_file(url):
@@ -107,6 +112,9 @@ def crawl():
 	max_links = 0
 
 	while len(urls) > 0:
+		if not hasattr(db.db_connection, 'connection'):
+			db.init_db()
+
 		max_links += 1
 		print("   Link: \033[36m\'" + str(urls[0]) + "\'\033[0m")
 
@@ -201,11 +209,11 @@ def crawl():
 
 def main():
 	db.init_db()
-	db.start_crawl_transaction()
+	#db.start_crawl_transaction()
 	crawl()
 	print('\n-- Crawl Complete --')
 	print('Finishing Database Transaction')
-	db.finish_crawl_transaction()
+	#db.finish_crawl_transaction()
 
 if __name__ == "__main__":
 	main()
