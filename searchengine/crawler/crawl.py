@@ -12,22 +12,22 @@ import signal
 import re
 
 class timeout:
-    def __init__(self, seconds=20, error_message='Timeout'):
-        self.seconds = seconds
-        self.error_message = error_message
-    def handle_timeout(self, signum, frame):
-        raise TimeoutError(self.error_message)
-    def __enter__(self):
-        signal.signal(signal.SIGALRM, self.handle_timeout)
-        signal.alarm(self.seconds)
-    def __exit__(self, type, value, traceback):
-        signal.alarm(0)
+	def __init__(self, seconds=20, error_message='Timeout'):
+		self.seconds = seconds
+		self.error_message = error_message
+	def handle_timeout(self, signum, frame):
+		raise TimeoutError(self.error_message)
+	def __enter__(self):
+		signal.signal(signal.SIGALRM, self.handle_timeout)
+		signal.alarm(self.seconds)
+	def __exit__(self, type, value, traceback):
+		signal.alarm(0)
 
 def read_config_file(file_name):
-    f = open(file_name, 'r')
-    file_lines = f.readlines()
-    f.close()
-    return [_.split("\n")[0] for _ in file_lines]
+	f = open(file_name, 'r')
+	file_lines = f.readlines()
+	f.close()
+	return [_.split("\n")[0] for _ in file_lines]
 
 # ignore image files and non csc.calpoly.edu urls and
 # the visited links
@@ -147,7 +147,7 @@ def crawl():
 
 				# kill all script and style elements
 				for script in soup(["script", "style"]):
-				    script.extract()    # rip it out
+					script.extract()    # rip it out
 
 				# get text
 				text = soup.get_text()
@@ -167,7 +167,7 @@ def crawl():
 
 				term_list = text.split(' ')
 
-		      	# Update database
+				# Update database
 				index_one_file(urls[0], term_list)
 
 				url_top = urls[0]
