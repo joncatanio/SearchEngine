@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Freelancer - Start Bootstrap Theme</title>
+    <title>Hooli Search</title>
 
     <!-- Bootstrap Core CSS -->
     <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -22,10 +22,34 @@
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css">
 
+    <link rel="apple-touch-icon" sizes="57x57" href="apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
+    <style>
+        .table th {
+           text-align: center;   
+        }
+    </style>    
+
 </head>
 
 <body id="page-top" class="index">
-<div id="skipnav"><a href="#maincontent">Skip to main content</a></div>
+<div id="skipnav"><a href="#maincontent">Skip to main content</a></div>    
 
     <!-- Navigation -->
     <nav id="mainNav" class="navbar navbar-default navbar-fixed-top navbar-custom">
@@ -60,10 +84,10 @@
                         <a href="#algorithms">Algorithms</a>
                     </li>
                     <li class="page-scroll">
-                        <a href="#results">Results</a>
+                        <a href="#demo">Demo</a>
                     </li>
                     <li class="page-scroll">
-                        <a href="#demo">Demo</a>
+                        <a href="#project-information">Project Information</a>
                     </li>
                 </ul>
             </div>
@@ -104,7 +128,7 @@
  
                 <p>PageRank uses links in the anchor text of hyperlinks. Hyperlinks carry important information, such as page organization, but more importantly in our case which pages point to which other pages. Such out-going hyperlinks often indicate an implicit conveyance of authority to the pages being pointed to. For example, CNN is considered an authoritative site because many sites cite and point to it. Those pages that are pointed to by many other pages are likely to contain authoritative information and thus are ranked higher in our search if they have a similar TF-IDF score to other pages with lower authority.</p>
  
-                <p>The search engine UI should be very familiar to users, as it resembles Google. The search results are presented in a list of results generated when the search completes. The results may be a mix of web pages, pdfs, and other types of files. We currently do not support image files and executable files.</p>
+                <p>The search engine UI should be very familiar to users. The search results are presented in a list of results generated when the search completes. The results may be a mix of web pages, pdfs, and other types of files. We currently do not support image files and executable files.</p>
             </div>
         </div>
     </section>
@@ -217,10 +241,10 @@
                     <p>TF-IDF is a weighting scheme used to provide a value for each search term in each document. The Term Frequency (TF) part of TF-IDF corresponds to the frequency of a term within a document divided by the maximum frequency of any word within the document. This normalizes the frequency of a term to be between 0-1. The Inverse Document Frequency (IDF) part of TF-IDF corresponds to the total number of documents divided by the number of documents containing the given term. This allows words that are less frequent to be ranked more highly and words that are more common to be disregarded. To obtain the final TF-IDF score, the TF and IDF values are multiplied together. This process is then repeated for each term in the search query, resulting in a vector of TF-IDF weights for the given document. The TF-IDF weight vector is also computed for the search query itself, treating it as if it were a document.</p>
                      
                     <p>We then take the weight vectors computed for each link and compare it to the query’s weight vector using Cosine Similarity. Cosine Similarity tries to reduce the effect of repeating terms multiple times and ranks documents with 10 instances of each word the same as documents with 1 instance of each word. However, if a document contains many instances of one search term and few instances of another search term, its Cosine Similarity score will actually be lower. This problem became evident when searching for “Aaron Keen”. Keen’s csc webpage contains many publications listing his last name, but his first name is only listed once on the page. Because of this, we decided to explore other similarity metrics as well, namely Euclidean Distance. Using Euclidean Distance, Keen’s csc webpage was ranked much more highly. The downside of Euclidean Distance is that it may pick up pages with many instances of “Aaron” as well, which may not be as relevant.</p>
+
+                    <img class="img-responsive" src="img/tf-idf.png" style="margin:0 auto 2% auto;float:right;">
                      
                     <p>We then combined the similarity score with the previously computed PageRank score for the each link using the Harmonic Mean of the two values. The Harmonic Mean gives us a higher value when both scores are high, and a low value when either of the scores are low. This results in our relevance rankings for the links, sorted by highest harmonic mean. We then return the top 10 links to the frontend, which displays them on our website.</p>
-
-                    <img class="img-responsive" src="img/tf-idf.png" style="margin:0 auto 2% auto">
                 </div>
                 <div class="col-lg-6">
                     <h3>PageRank</h3>
@@ -232,43 +256,82 @@
                      
                     <p>Dangling pages, which are pages with no outlinks are dealt with by adding a complete set of outgoing links from each page to all the pages in the web. This is represented in the code by a dangling product that is calculated each iteration, and of course the weights of these outgoing links are much lower due to the damping factor. After the full computation, the pagerank value for each link is inserted into the database and is ready for use in our search query algorithm TF-IDF.</p>
 
-                    <img class="img-responsive" src="img/pagerank.jpg" style="margin:0 auto 2% auto">
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Results Section -->
-    <section class="hooli" id="results">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12 text-center">
-                    <h2>Results</h2>
-                    <hr class="star-light">
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-lg-6">
-                    <p>Freelancer is a free bootstrap theme created by Start Bootstrap. The download includes the complete source files including HTML, CSS, and JavaScript as well as optional LESS stylesheets for easy customization.</p>
-                </div>
-                <div class="col-lg-6">
-                    <p>Whether you're a student looking to showcase your work, a professional looking to attract clients, or a graphic artist looking to share your projects, this template is the perfect starting point!</p>
+                    <img class="img-responsive" src="img/pagerank.png" style="margin:0 auto 2% auto">
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Demo Section -->
-    <section id="demo">
+    <section class="hooli" id="demo">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12 text-center">
                     <h2>Demo</h2>
+                    <hr class="star-light">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-3"></div>
+                <div class="col-lg-8">
+                    <iframe width="560" height="315" src="https://www.youtube.com/embed/3puXTNTGIgs" frameborder="0" allowfullscreen></iframe>
+                </div>                
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Section -->
+    <section id="project-information">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <h2>Project Information</h2>
                     <hr class="hooli-light">
                 </div>
             </div>
             <div class="row">
-                
+                <div class="col-lg-6 text-center">
+                    <table class="table table-striped table-bordered">
+                        <tr>
+                            <th>Team Member</th>
+                            <th>Duties</th>
+                        </tr>
+                        <tr>
+                            <td>Jon Catanio</td>
+                            <td>Database, Combining components</td>
+                        </tr>
+                        <tr>
+                            <td>Tyler Dahl</td>
+                            <td>TF-IDF</td>
+                        </tr>
+                        <tr>
+                            <td>Alex Greene</td>
+                            <td>UI</td>
+                        </tr>
+                        <tr>
+                            <td>Lohit Vankineni</td>
+                            <td>PageRank</td>
+                        </tr>
+                        <tr>
+                            <td>Shubham Kahal</td>
+                            <td>Crawler</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="col-lg-6 text-center">
+                    <div class="well">
+                        <a href="https://github.com/joncatanio/SearchEngine" style="font-size:20px" target="_blank">Source Code</a>
+                        <br />
+                        <a href="https://docs.google.com/presentation/d/1Mwfk1RckKhTuMVRZqFemhwv3GYwCVkzoWsIo9x-WeVA/edit?usp=sharing" style="font-size:20px" target="_blank">Presentation Slides</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2">
+                    <iframe src="https://docs.google.com/document/d/134xU1i31uVu-GpgAr7iJGhpfD6qczCl6ESZnufPfeBA/pub?embedded=true" width="100%" height="1000px"></iframe>            
+                </div>                
             </div>
         </div>
     </section>
