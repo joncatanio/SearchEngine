@@ -11,24 +11,16 @@ import searchengine.crawler.stack as stack
 import signal
 import re
 
-class TimeoutError(Exception):
-    pass
-
 class timeout:
     def __init__(self, seconds=20, error_message='Timeout'):
-        print("init")
         self.seconds = seconds
         self.error_message = error_message
     def handle_timeout(self, signum, frame):
-        print("raise!!!")
         raise TimeoutError(self.error_message)
     def __enter__(self):
-        print("enter")
         signal.signal(signal.SIGALRM, self.handle_timeout)
-        print("next")
         signal.alarm(self.seconds)
     def __exit__(self, type, value, traceback):
-        print("EXIT . . .")
         signal.alarm(0)
 
 def read_config_file(file_name):
@@ -40,46 +32,46 @@ def read_config_file(file_name):
 # ignore image files and non csc.calpoly.edu urls and
 # the visited links
 def check_tag(tag, visited):
-    black_list = read_config_file("black_list.txt")
-    proper_urls = read_config_file("proper_urls.txt")
+	black_list = read_config_file("black_list.txt")
+	proper_urls = read_config_file("proper_urls.txt")
 
-    for _ in black_list:
-        if _ in tag:
-            return False
+	for _ in black_list:
+		if _ in tag:
+			return False
 
-    for _ in proper_urls:
-        if _ in tag:
-            return (tag not in visited)
+	for _ in proper_urls:
+		if _ in tag:
+			return (tag not in visited)
 
-    return False
+	return False
 
 # ignore image files and non csc.calpoly.edu urls but
 # don't worry about visited links
 def check_tag_without_visited(tag):
-    black_list = read_config_file("black_list.txt")
-    proper_urls = read_config_file("proper_urls.txt")
+	black_list = read_config_file("black_list.txt")
+	proper_urls = read_config_file("proper_urls.txt")
 
-    for _ in black_list:
-        if _ in tag:
-            return False
+	for _ in black_list:
+		if _ in tag:
+			return False
 
-    for _ in proper_urls:
-        if _ in tag:
-            return True
+	for _ in proper_urls:
+		if _ in tag:
+			return True
 
-    return False
+	return False
 
 # Input = [word1, word2, ...]
 # Updates database returns nothing
 def index_one_file(baselink, term_list):
    # List of tuples (word, position)
-    word_list = []
+	word_list = []
 
-    for index, word in enumerate(term_list):
-        if len(word.strip()) == 0:
-            continue
+	for index, word in enumerate(term_list):
+		if len(word.strip()) == 0:
+			continue
 
-        word_list.append((word.strip(), index))
+		word_list.append((word.strip(), index))
 
 	print("   \033[35mAdding " + str(len(word_list)) + " words\033[0m")
 	max_insert = 10000
@@ -94,16 +86,16 @@ def index_one_file(baselink, term_list):
 
 # extracts text from pdf file
 def read_pdf_file(url):
-    pdf_file_obj = open(url, 'rb')
-    pdf_reader = PyPDF2.PdfFileReader(pdf_file_obj)
-    num_pages = pdf_reader.numPages
-    total_text = ""
+	pdf_file_obj = open(url, 'rb')
+	pdf_reader = PyPDF2.PdfFileReader(pdf_file_obj)
+	num_pages = pdf_reader.numPages
+	total_text = ""
 
-    for page_num in range(num_pages):
-        page_obj = pdf_reader.getPage(0)
-        total_text += page_obj.extractText() + " "
+	for page_num in range(num_pages):
+		page_obj = pdf_reader.getPage(0)
+		total_text += page_obj.extractText() + " "
 
-    return total_text
+	return total_text
 
 def crawl():
 	urls = [url.split("\n")[0] for url in stack.get_stack()] # stack of urls to scrape
@@ -224,4 +216,4 @@ def main():
 	#db.finish_crawl_transaction()
 
 if __name__ == "__main__":
-    main()
+	main()

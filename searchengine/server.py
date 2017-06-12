@@ -5,24 +5,23 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from algorithms import TF_IDF
 import searchengine.database.search_engine_db as db
+import signal
 
 app = Flask(__name__)
-timeout = 2
 
 @app.route('/search/<query>/<pr_flag>/', methods = ['GET'])
 def search(query, pr_flag):
     start = datetime.now()
+    print(pr_flag)
     links = TF_IDF.findRelevantLinks(query, 10, pr_flag)
 
     results = []
 
     for link in links:
-        print(link)
-
+        signal.alarm(2)
         title = None
-        des = None
-        page = requests.request('GET', link, timeout=0.25, verify=False)
-        if page.encoding is not None:
+        try:
+            page = requests.request('GET', link, timeout=0.25, verify=False)
             soup = BeautifulSoup(page.text, "html.parser")
             des = soup.find('meta', {'name':'Description'})
             if des is None:
@@ -36,7 +35,10 @@ def search(query, pr_flag):
                     query_index = all_text.find(query.lower())
                     des = " ".join(all_text[query_index - 120: query_index + 120].split(" ")[1:-1])
             title = soup.find('title')
-
+        except Exception as exc:
+            print(exc)
+        signal.alarm(0)
+        
         results.append({ 
             'title': title.text if title is not None else link, 
             'link': link,
@@ -58,7 +60,11 @@ def search(query, pr_flag):
     resp.headers['Access-Control-Allow-Origin'] = "*"
     return resp
 
+def handler(signum, frame):
+   raise Exception("request timed out")
+
 if __name__ == '__main__':
     app.debug = True
+    signal.signal(signal.SIGALRM, handler)
     db.init_db()
     app.run()
