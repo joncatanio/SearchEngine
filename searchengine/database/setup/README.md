@@ -60,7 +60,7 @@ Below is all of the information created by the setup script:
 $ mysql -u root -p < setup.mysql
 Enter password:
 $ mysql -u searchEngineUser -p SearchEngineDB
-Enter password: search_engine_db
+Enter password: search_engine_pw
 
 MariaDB [SearchEngineDB] >  SHOW TABLES;
 +--------------------------+
