@@ -57,6 +57,9 @@ Endpoints for updating all the database tables. The endpoints provided in this f
 `updatePageRank(links)` - Updates the Links tables with new PageRank values.
 - `links` - a dictionary `{link: pageRank, ...}` of links to update
 
+## Warnings
+Sometimes the crawler hiccups and the database connection is lost, `start_crawl_transaction` and `finish_crawl_transaction` are currently just used to start and commit transactions, one may need to explicitly call `db.db_connection.connection.commit()` if they are running into too large of transactions. See the `crawler.py` code for examples.
+
 ## Examples
 ```python
 import searchengine.database.search_engine_db as db
