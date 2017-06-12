@@ -41,3 +41,8 @@ Replace the bracketed text with the credentials provided by [@alexgreene](https:
 To add links to the stack, run `python3 stack.py site:csc.calpoly.edu/~ 1` where `site:csc.calpoly.edu/~` would be replaced with your search term and `1` would be the number of pages of Google search results to pull urls from. 
 
 *Note: We are limited to 100 total pages per day, with each page returning 10 results.*
+
+## PageRank
+To assign a PageRank to each link simply navigate to the `searchengine/algorithms` directory and run `python3 PageRank.py`, this will begin assigning ranks to each link.
+
+*Note: The database needs to be setup and populated before running the PageRank file*
