@@ -1,3 +1,6 @@
+# Cal Poly Search Engine For CSC Domain
+Authors: Jon Catanio, Tyler Dahl, Alex Greene, Lohit Vankineni, & Shubham Kahal
+
 ## Setup for the searchengine package
 In order to use the `searchengine` package the `PYTHONPATH` environment variable
 needs to be updated.
