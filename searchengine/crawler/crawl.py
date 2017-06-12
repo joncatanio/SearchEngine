@@ -64,7 +64,7 @@ def check_tag_without_visited(tag):
 # Input = [word1, word2, ...]
 # Updates database returns nothing
 def index_one_file(baselink, term_list):
-   # List of tuples (word, position)
+	# List of tuples (word, position)
 	word_list = []
 
 	for index, word in enumerate(term_list):
@@ -191,7 +191,7 @@ def crawl():
 					db.addLinks(url_top, links_to_add)
 
 				for tag in soup.findAll('a', href=True):
-					tag['href'] = urljoin(url_top, tag['href'])					
+					tag['href'] = urljoin(url_top, tag['href'])              
 
 					# check if the url is valid and has not been visited
 					if check_tag(tag['href'], visited):
@@ -202,7 +202,7 @@ def crawl():
 			urls.pop(0)
 			continue
 
-	   # Every 1000 links visited lets reset the connection
+		# Every 1000 links visited lets reset the connection
 		db.db_connection.connection.commit()
 
 	return visited
