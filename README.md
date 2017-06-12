@@ -46,3 +46,6 @@ To add links to the stack, run `python3 stack.py site:csc.calpoly.edu/~ 1` where
 To assign a PageRank to each link simply navigate to the `searchengine/algorithms` directory and run `python3 PageRank.py`, this will begin assigning ranks to each link.
 
 *Note: The database needs to be setup and populated before running the PageRank file*
+
+## Other Information
+For other information please visit some of the other directories in the package, most have their own README files associated with them.
