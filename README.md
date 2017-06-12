@@ -11,6 +11,9 @@ needs to be updated.
 #### Exporting a temporary path change type into the terminal
 - `$ export PYTHONPATH=${PYTHONPATH}:<absolute_path/to/SearchEngine/>`
 
+#### Package Requirements
+Please see the `requirements.txt` file in the root directory. You should be able to run the command `pip3 install -r requirements.txt` to install them pretty easily.
+
 ## Setting up the Database
 Please refer to the README located [here](searchengine/database/setup/README.md) to learn how to set up the MySQL database.
 A testing database that has pre-crawled information with PageRanks assigned can be found [here](searchengine/test/test_db.gz).
