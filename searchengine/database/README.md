@@ -1,5 +1,5 @@
 # Database Source Files
-The description and method stubs for each module is defined below. Examples can be found at the end of the file. If there is confusion on setting up the database click [here](../setup/README.md).
+The description and method stubs for each module is defined below. Examples can be found at the end of the file. If there is confusion on setting up the database click [here](setup/README.md).
 
 ### search_engine_db.py
 This is the sole module to import when using the database endpoints. This file simply imports all of the functions from the other modules and has an initialization method to start the database connection.
