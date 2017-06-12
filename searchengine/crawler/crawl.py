@@ -121,11 +121,11 @@ def read_pdf_file(url):
 	return total_text
 
 def crawl():
-	urls = [url.split("\n")[0] for url in stack.get_stack()] # stack of urls to scrape
+	urls = [clean_tag(url.split("\n")[0]) for url in stack.get_stack()] # stack of urls to scrape
 
 	# The first url we're crawling needs to be marked as already visited.
 	# Otherwise if the page contained a link to itself, we'd crawl it twice.
-	visited = [url.split("\n")[0] for url in stack.get_stack()]
+	visited = [clean_tag(url.split("\n")[0]) for url in stack.get_stack()]
 
 	exclude = set(string.punctuation)
 	url_map = {}
