@@ -52,3 +52,9 @@ To assign a PageRank to each link simply navigate to the `searchengine/algorithm
 
 ## Other Information
 For other information please visit some of the other directories in the package, most have their own README files associated with them.
+
+The website can be found [here](http://frank.ored.calpoly.edu/~kahal466/) which includes information that was found in our final report.
+
+The live demo can be found on our [AWS EC2 instance](http://ec2-54-183-201-81.us-west-1.compute.amazonaws.com/). This will only be up for a short period of time as we do not want to pay for it to stay up. If you would like to see the live version please contact me at joncatanio [at] gmail [dot] com. The live version is using a precrawled database and will be out of date as new pages get added to the `csc.calpoly.edu` domain since we are not constantly crawling on that instance.
+
+If you are experiencing some slowness in getting results that is simply due to us using [beautiful soup](https://www.crummy.com/software/BeautifulSoup/) to fetch relevant link titles and descriptions after the database API returns links. We realize this was not the best design decision and could have been remedied by storing that data in the `Links` table after each crawl. Other than that it operates as expected and the results should be very relevant! :)
