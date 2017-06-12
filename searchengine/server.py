@@ -19,7 +19,7 @@ def search(query, pr_flag):
         title = None
         des = None
         
-        page = requests.request('GET', link, timeout=0.25, verify=False)
+        page = requests.request('GET', link, verify=False)
         if page.encoding is not None:
             soup = BeautifulSoup(page.text, "html.parser")
             des = soup.find('meta', {'name':'Description'})
