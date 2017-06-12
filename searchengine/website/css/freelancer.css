@@ -30,6 +30,32 @@ h6 {
   text-transform: uppercase;
   font-weight: 700;
 }
+hr.hooli-light,
+hr.hooli-primary {
+  padding: 0;
+  border: none;
+  border-top: solid 5px;
+  text-align: center;
+  max-width: 250px;
+  margin: 25px auto 30px;
+}
+hr.hooli-light:after,
+hr.hooli-primary:after {
+  content: "\f005";
+  font-family: FontAwesome;
+  display: inline-block;
+  position: relative;
+  top: -0.8em;
+  font-size: 2em;
+  padding: 0 0.25em;
+}
+hr.hooli-light {
+  border-color: #3371A4;
+}
+hr.hooli-light:after {
+  background-color: #18BC9C;
+  color: white;
+}
 hr.star-light,
 hr.star-primary {
   padding: 0;
@@ -179,6 +205,10 @@ section {
 section h2 {
   margin: 0;
   font-size: 3em;
+}
+section.intro {
+  background: #647899;
+  color: white;
 }
 section.hooli {
   background: #3371A4;
