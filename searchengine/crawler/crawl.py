@@ -61,6 +61,29 @@ def check_tag_without_visited(tag):
 
 	return False
 
+# cleans tags removing characters that cause 'duplicate'
+# links to be stored
+def clean_tag(tag):
+	tag = tag.strip()
+
+	if (not check_tag_without_visited(tag)):
+		return tag
+
+	# remove leading and trailing slash
+	tag = tag.strip("/")
+
+	# default to http, no https
+	tag = "http://" + tag.split("//")[1]
+
+	# remove www. as it is not necessary
+	# may replace some false positives ('www.com')
+	tag = tag.replace("www.", "")
+
+	if (tag.split('/')[-1] == ''):		
+		tag = tag[:-1]
+
+	return tag
+
 # Input = [word1, word2, ...]
 # Updates database returns nothing
 def index_one_file(baselink, term_list):
@@ -180,7 +203,7 @@ def crawl():
 				print("Visited:", max_links, "-- URL Stack:", len(urls))
 
 				for tag in soup.findAll('a', href=True):
-					tag['href'] = urljoin(url_top, tag['href'])
+					tag['href'] = clean_tag(urljoin(url_top, tag['href']))
 
 					# check if the url is valid not worrying about visited,
 					# this is to get the mapping from a link to get
@@ -191,7 +214,7 @@ def crawl():
 					db.addLinks(url_top, links_to_add)
 
 				for tag in soup.findAll('a', href=True):
-					tag['href'] = urljoin(url_top, tag['href'])              
+					tag['href'] = clean_tag(urljoin(url_top, tag['href']))
 
 					# check if the url is valid and has not been visited
 					if check_tag(tag['href'], visited):
